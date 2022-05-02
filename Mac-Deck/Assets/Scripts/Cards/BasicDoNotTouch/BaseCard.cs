@@ -37,7 +37,7 @@ public class BaseCard : MonoBehaviour, CardInterface
 
         BetterButton cardButton = GetComponentInChildren<BetterButton>();
         cardButton.OnClickEvent.AddListener(SelectCard);
-        cardButton.OnReleasedEvent.AddListener(SelectCard);
+        cardButton.OnReleasedEvent.AddListener(PlayCard);
         cardButton.OnHoverEnter.AddListener(CardHoverEnter);
         cardButton.OnHoverExit.AddListener(CardHoverExit);
 
@@ -79,15 +79,6 @@ public class BaseCard : MonoBehaviour, CardInterface
             transform.position = targetHoverCardLocation;
             transform.localScale = targetHoverCardScale;
             isCardSelected = true;
-        }
-        else
-        {
-            isCardSelected = false;
-            if (DuelManager.GetInstance().TryPlayCard(this))
-            {
-                // @TODO: Add stuff in here
-            }
-            else StartCoroutine(ReturnCardToPosition());
         }
     }
 
