@@ -2,9 +2,9 @@ using UnityEngine;
 
 public enum CardType
 {
-    Special,
     Infantry,
-    Tactic
+    Tactic,
+    Special
 }
 
 [CreateAssetMenu(fileName = "CardData", menuName = "Cards/CardData", order = 1)]

@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Name
+  - Type
+  - Health
+  - Description
+  - Strength
+  - Image
   layers:
   - Default
   - TransparentFX

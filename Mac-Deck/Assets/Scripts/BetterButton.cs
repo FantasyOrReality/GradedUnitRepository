@@ -4,11 +4,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(Button))]
-public class BetterButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
+public class BetterButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler, IPointerEnterHandler
 {
     public UnityEvent OnClickEvent;
     public UnityEvent OnReleasedEvent;
     public UnityEvent OnHoldEvent;
+    public UnityEvent OnHoverEnter;
+    public UnityEvent OnHoverExit;
 
     private Button button;
 
@@ -46,14 +48,23 @@ public class BetterButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         }
     }
 
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (!button.interactable) return;
+
+        if (!buttonPressed)
+        {
+            OnHoverEnter?.Invoke();
+        }
+    }
+
     public void OnPointerExit(PointerEventData eventData)
     {
         if (!button.interactable) return;
 
-        if (buttonPressed)
+        if (!buttonPressed)
         {
-            OnReleasedEvent?.Invoke();
-            buttonPressed = false;
+            OnHoverExit?.Invoke();
         }
     }
 }
