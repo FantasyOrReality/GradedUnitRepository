@@ -6,7 +6,7 @@ public class DuelManager : MonoBehaviour
 {
     static DuelManager instance;
 
-    public DuelManager GetInstance()
+    public static DuelManager GetInstance()
     {
         return instance;
     }
@@ -23,5 +23,11 @@ public class DuelManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
         }
+    }
+
+    public bool TryPlayCard(BaseCard cardToPlay)
+    {
+        Debug.Log("Card played: " + cardToPlay.GetCardData().cardName);
+        return false;
     }
 }
