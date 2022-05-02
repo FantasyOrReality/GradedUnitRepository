@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,8 @@ public class BaseCard : MonoBehaviour, CardInterface
     private Vector3 targetHoverCardScale;
     private Vector3 targetHoverCardLocation;
 
+    private float hoverMinYoffset, hoverMaxYoffset;
+    private float hoverYoffset = 50;
     private Coroutine cardHover;
 
     private void Awake() 
@@ -41,7 +44,9 @@ public class BaseCard : MonoBehaviour, CardInterface
         cardButton.OnHoverEnter.AddListener(CardHoverEnter);
         cardButton.OnHoverExit.AddListener(CardHoverExit);
 
-        targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + 50, transform.position.z);
+        targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + hoverYoffset, transform.position.z);
+        hoverMaxYoffset = targetHoverCardLocation.y;
+        hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
         targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
     }
 
@@ -98,6 +103,8 @@ public class BaseCard : MonoBehaviour, CardInterface
     {
         if (isCardReturningToPos || isCardSelected) return;
         
+        initialCardPosition = transform.position;
+        
         if (cardHover != null)
             StopCoroutine(cardHover);
         
@@ -126,13 +133,16 @@ public class BaseCard : MonoBehaviour, CardInterface
 
     IEnumerator CardScaleOnHover(bool reversed)
     {
+
+        Canvas currCanvas = GetComponentInChildren<Canvas>();
         float delta = 0;
         if (reversed)
         {
-            targetHoverCardLocation *= -1;
+            targetHoverCardLocation.y = Mathf.Clamp(targetHoverCardLocation.y - hoverYoffset, hoverMinYoffset, hoverMaxYoffset);
             targetHoverCardScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
 
+        currCanvas.sortingOrder = 1;
         Vector3 cInitialPosition = transform.position;
         Vector3 initialScale = transform.localScale;
 
@@ -146,7 +156,8 @@ public class BaseCard : MonoBehaviour, CardInterface
 
         if (reversed)
         {
-            targetHoverCardLocation *= -1;
+            currCanvas.sortingOrder = 0;
+            targetHoverCardLocation.y = Mathf.Clamp(targetHoverCardLocation.y + hoverYoffset, hoverMinYoffset, hoverMaxYoffset);
             targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
         }
         

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public enum CardType
@@ -7,7 +8,7 @@ public enum CardType
     Special
 }
 
-[CreateAssetMenu(fileName = "CardData", menuName = "Cards/CardData", order = 1)]
+[CreateAssetMenu(fileName = "CardData", menuName = "Cards/CardData", order = 1)][Serializable]
 public class BasicCardScriptable : ScriptableObject
 {
     public string cardName;
