@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class BaseCard : MonoBehaviour, CardInterface
 {
@@ -10,13 +11,14 @@ public class BaseCard : MonoBehaviour, CardInterface
     
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
+    private bool cardPlayed = false;
     
     private Vector3 initialCardPosition;
     private Vector3 targetHoverCardScale;
     private Vector3 targetHoverCardLocation;
 
     private float hoverMinYoffset, hoverMaxYoffset;
-    private float hoverYoffset = 50;
+    private float hoverYoffset = 350;
     private Coroutine cardHover;
 
     private void Awake()
@@ -78,7 +80,7 @@ public class BaseCard : MonoBehaviour, CardInterface
     
     private void SelectCard()
     {
-        if (!isCardSelected)
+        if (!isCardSelected || cardPlayed)
         {
             initialCardPosition = transform.position;
             StopCoroutine(cardHover);
@@ -90,19 +92,19 @@ public class BaseCard : MonoBehaviour, CardInterface
 
     private void PlayCard()
     {
-        if (!isCardSelected) return;
+        if (!isCardSelected || cardPlayed) return;
         
         isCardSelected = false;
-        if (DuelManager.GetInstance().TryPlayCard(this))
+        if (!DuelManager.GetInstance().TryPlayCard(this))
         {
-            // @TODO: Add stuff in here
+            StartCoroutine(ReturnCardToPosition());
         }
-        else StartCoroutine(ReturnCardToPosition());
+        else cardPlayed = true;
     }
 
     private void CardHoverEnter()
     {
-        if (isCardReturningToPos || isCardSelected) return;
+        if (isCardReturningToPos || isCardSelected || cardPlayed) return;
         
         initialCardPosition = transform.position;
         
@@ -114,7 +116,7 @@ public class BaseCard : MonoBehaviour, CardInterface
 
     private void CardHoverExit()
     {
-        if (isCardReturningToPos || isCardSelected) return;
+        if (isCardReturningToPos || isCardSelected || cardPlayed) return;
         
         if (cardHover != null)
             StopCoroutine(cardHover);
@@ -196,6 +198,6 @@ public class BaseCard : MonoBehaviour, CardInterface
     
     public virtual void CardEffect()
     {
-        // @NOTE: This will be overridden
+        Destroy(gameObject);
     }
 }
