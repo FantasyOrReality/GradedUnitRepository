@@ -1,13 +1,15 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Unity.VisualScripting;
 
 public class BaseCard : MonoBehaviour, CardInterface
 {
     [SerializeField] private BasicCardScriptable cardData;
+
+    private string cardName;
+    private int cardStrength;
+    private int cardHealth;
     
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
@@ -39,16 +41,15 @@ public class BaseCard : MonoBehaviour, CardInterface
             else if (text.CompareTag("Type")) text.text = CardTypeToString(cardData.cardType);
         }
 
+        cardName = cardData.cardName;
+        cardStrength = cardData.cardStrength;
+        cardHealth = cardData.cardHealth;
+
         BetterButton cardButton = GetComponentInChildren<BetterButton>();
         cardButton.OnClickEvent.AddListener(SelectCard);
         cardButton.OnReleasedEvent.AddListener(PlayCard);
         cardButton.OnHoverEnter.AddListener(CardHoverEnter);
         cardButton.OnHoverExit.AddListener(CardHoverExit);
-
-        targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + hoverYoffset, transform.position.z);
-        hoverMaxYoffset = targetHoverCardLocation.y;
-        hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
-        targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
     }
     
     private string CardTypeToString(CardType type)
@@ -80,7 +81,7 @@ public class BaseCard : MonoBehaviour, CardInterface
     
     private void SelectCard()
     {
-        if (!isCardSelected || cardPlayed)
+        if (!isCardSelected && !cardPlayed)
         {
             initialCardPosition = transform.position;
             StopCoroutine(cardHover);
@@ -99,7 +100,14 @@ public class BaseCard : MonoBehaviour, CardInterface
         {
             StartCoroutine(ReturnCardToPosition());
         }
-        else cardPlayed = true;
+        else
+        {
+            cardPlayed = true;
+            foreach (var image in GetComponentsInChildren<Image>())
+            {
+                if (image.CompareTag("Template")) image.raycastTarget = false;
+            }
+        }
     }
 
     private void CardHoverEnter()
@@ -123,10 +131,13 @@ public class BaseCard : MonoBehaviour, CardInterface
         
         cardHover = StartCoroutine(CardScaleOnHover(true));
     }
-
-    public BasicCardScriptable GetCardData()
+    
+    public void SetUp()
     {
-        return cardData;
+        targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + hoverYoffset, transform.position.z);
+        hoverMaxYoffset = targetHoverCardLocation.y;
+        hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
+        targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
     }
     
     public bool IsCardTactic()
@@ -139,6 +150,32 @@ public class BaseCard : MonoBehaviour, CardInterface
         return cardData.cardType == CardType.Special;;
     }
 
+    public int GetCardHealth()
+    {
+        return cardHealth;
+    }
+
+    public int GetCardStrength()
+    {
+        return cardStrength;
+    }
+
+    public CardType GetCardType()
+    {
+        return cardData.cardType;
+    }
+
+    public bool ApplyHealthChange(int delta)
+    {
+        cardHealth += delta;
+
+        return cardHealth > 0;
+    }
+
+    public void ApplyAttackChange(int delta)
+    {
+        cardStrength += delta;
+    }
     
     private bool IsCardTacticOrSpecial()
     {
@@ -167,6 +204,9 @@ public class BaseCard : MonoBehaviour, CardInterface
             delta += Time.deltaTime * 5f;
             yield return null;
         }
+        
+        transform.position = targetHoverCardLocation;
+        transform.localScale = targetHoverCardScale;
 
         if (reversed)
         {
@@ -174,7 +214,6 @@ public class BaseCard : MonoBehaviour, CardInterface
             targetHoverCardLocation.y = Mathf.Clamp(targetHoverCardLocation.y + hoverYoffset, hoverMinYoffset, hoverMaxYoffset);
             targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
         }
-        
         yield return null;
     }
 

@@ -1,21 +1,35 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 [Serializable]
-public struct DuelLanes
+public class DuelLanes
 {
     public Transform upperLimit;
     public Transform lowerLimit;
     public Transform snapPoint;
 
+    public bool occupied;
+    
     public BaseCard cardInLane;
-
+    
     public void SetCardInLane(BaseCard inCard)
     {
         cardInLane = inCard;
+        occupied = true;
     }
+}
+
+[Serializable]
+public class CardTarget
+{
+    public Transform target;
+    public bool occupied;
+
+    public void SetIsOccupied(bool inBool) => occupied = inBool;
 }
 
 public class DuelManager : MonoBehaviour
@@ -25,8 +39,16 @@ public class DuelManager : MonoBehaviour
     public SNameGenerator nameGen;
 
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
+    [SerializeField] private List<CardTarget> cardTargets = new List<CardTarget>(6);
+    [SerializeField] private List<BaseCard> playerHand = new List<BaseCard>(6);
     [SerializeField] private Transform tacticUpperLimit;
     [SerializeField] private Transform tacticLowerLimit;
+    [SerializeField] private Transform cardSpawn;
+    [SerializeField] private Text remainingCardsText;
+
+    [SerializeField] private Deck selectedDeck;
+
+    private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
 
     public static DuelManager GetInstance()
     {
@@ -47,6 +69,44 @@ public class DuelManager : MonoBehaviour
             instance = this;
             DontDestroyOnLoad(gameObject);
         }
+
+        foreach (var card in selectedDeck.cardsInDeck)
+        {
+            cardsInDeck.Add(card);
+        }
+    }
+
+    private Vector3 GetFirstUnoccupiedTargetTransform()
+    {
+        for (int i = 0; i < cardTargets.Count; i++)
+        {
+            if (!cardTargets[i].occupied)
+            {
+                cardTargets[i].SetIsOccupied(true);
+                return cardTargets[i].target.transform.position;
+            }
+        }
+
+        cardTargets[0].SetIsOccupied(true);
+        return cardTargets[0].target.transform.position;
+    }
+
+    private void SortOutHand(BaseCard cardPlayed)
+    {
+        playerHand.Remove(cardPlayed);
+
+        for (int i = 0; i < cardTargets.Count; i++)
+        {
+            if (i < playerHand.Count && playerHand[i] != null)
+            {
+                playerHand[i].transform.position = cardTargets[i].target.position;
+                playerHand[i].SetUp();
+            }
+            else
+            {
+                cardTargets[i].SetIsOccupied(false);
+            }
+        }
     }
 
     public bool TryPlayCard(BaseCard cardToPlay)
@@ -58,6 +118,7 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.transform.position.x < tacticLowerLimit.position.x &&
                 cardToPlay.transform.position.y > tacticLowerLimit.position.y)
             {
+                SortOutHand(cardToPlay);
                 cardToPlay.CardEffect();
                 return true;
             }
@@ -70,6 +131,9 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.transform.position.x < playerDuelLanes[i].lowerLimit.position.x &&
                 cardToPlay.transform.position.y > playerDuelLanes[i].lowerLimit.position.y)
             {
+                if (playerDuelLanes[i].occupied) return false;
+
+                SortOutHand(cardToPlay);
                 StartCoroutine(LerpCardToPlace(cardToPlay, i));
                 return true;
             }
@@ -78,6 +142,39 @@ public class DuelManager : MonoBehaviour
         return false;
     }
 
+    public void DrawCardFromDeck(int quantity = 1)
+    {
+        if (playerHand.Count >= 6) return;
+        
+        for (int i = 0; i < quantity; ++i)
+        {
+            BaseCard card = Instantiate(cardsInDeck[i], cardSpawn.position, cardSpawn.rotation);
+            playerHand.Add(card);
+            cardsInDeck.RemoveAt(i);
+            StartCoroutine(LerpCardFromDeckToLocation(card, GetFirstUnoccupiedTargetTransform()));
+        }
+        
+        remainingCardsText.text = cardsInDeck.Count.ToString();
+    }
+
+    IEnumerator LerpCardFromDeckToLocation(BaseCard card, Vector3 target)
+    {
+        Vector3 initialPos = card.transform.position;
+        float delta = 0;
+
+        while (delta < 1)
+        {
+            card.transform.position = Vector3.Lerp(initialPos, target, delta);
+            delta += Time.deltaTime * 10f;
+            yield return null;
+        }
+        
+        card.transform.position = target;
+        card.SetUp();
+        
+        yield return null;
+    }
+    
     IEnumerator LerpCardToPlace(BaseCard card, int laneIndex)
     {
         float delta = 0;
@@ -91,6 +188,9 @@ public class DuelManager : MonoBehaviour
             delta += Time.deltaTime * 10f;
             yield return null;
         }
+
+        card.transform.position = playerDuelLanes[laneIndex].snapPoint.transform.position;
+        card.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         
         playerDuelLanes[laneIndex].SetCardInLane(card);
         yield return null;
