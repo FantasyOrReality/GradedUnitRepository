@@ -3,7 +3,8 @@ using UnityEngine;
 
 public enum CardType
 {
-    Infantry,
+    LSoldier,
+    HSoldier,
     Tactic,
     Special
 }
@@ -12,6 +13,7 @@ public enum CardType
 public class BasicCardScriptable : ScriptableObject
 {
     public string cardName;
+    [TextArea(3, 10)]
     public string cardDescription;
     public int cardStrength;
     public int cardHealth;

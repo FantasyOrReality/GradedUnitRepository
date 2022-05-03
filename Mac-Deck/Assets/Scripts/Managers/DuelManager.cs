@@ -6,6 +6,8 @@ public class DuelManager : MonoBehaviour
 {
     static DuelManager instance;
 
+    public SNameGenerator nameGen;
+
     public static DuelManager GetInstance()
     {
         return instance;
@@ -13,6 +15,8 @@ public class DuelManager : MonoBehaviour
 
     private void Awake()
     {
+        GameObject.Instantiate(nameGen);
+        
         if (instance != null)
         {
             gameObject.SetActive(false);

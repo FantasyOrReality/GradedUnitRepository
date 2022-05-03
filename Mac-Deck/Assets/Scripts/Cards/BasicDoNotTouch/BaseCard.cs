@@ -7,8 +7,7 @@ using TMPro;
 public class BaseCard : MonoBehaviour, CardInterface
 {
     [SerializeField] private BasicCardScriptable cardData;
-
-    [SerializeField] private bool isTacticCard = false;
+    
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
     
@@ -20,7 +19,7 @@ public class BaseCard : MonoBehaviour, CardInterface
     private float hoverYoffset = 50;
     private Coroutine cardHover;
 
-    private void Awake() 
+    private void Awake()
     {
         GetComponentInChildren<Canvas>().worldCamera = Camera.main;
 
@@ -34,7 +33,7 @@ public class BaseCard : MonoBehaviour, CardInterface
             if (text.CompareTag("Strength")) text.text = cardData.cardStrength.ToString();
             else if (text.CompareTag("Health")) text.text = cardData.cardHealth.ToString();
             else if (text.CompareTag("Description")) text.text = cardData.cardDescription;
-            else if (text.CompareTag("Name")) text.text = cardData.cardName.ToString();
+            else if (text.CompareTag("Name")) text.text = IsCardTacticOrSpecial() ? cardData.cardName : SNameGenerator.GetInstance().GetRandomName();
             else if (text.CompareTag("Type")) text.text = CardTypeToString(cardData.cardType);
         }
 
@@ -49,13 +48,15 @@ public class BaseCard : MonoBehaviour, CardInterface
         hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
         targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
     }
-
+    
     private string CardTypeToString(CardType type)
     {
         switch (type)
         {
-            case CardType.Infantry:
-                return "Infantry";
+            case CardType.LSoldier:
+                return "L. Soldier";
+            case CardType.HSoldier:
+                return "H. Soldier";
             case CardType.Tactic:
                 return "Tactic";
             case CardType.Special:
@@ -126,9 +127,20 @@ public class BaseCard : MonoBehaviour, CardInterface
         return cardData;
     }
     
-    public bool GetIsCardTactic()
+    public bool IsCardTactic()
     {
-        return isTacticCard;
+        return cardData.cardType == CardType.Tactic;;
+    }
+    
+    public bool IsCardSpecial()
+    {
+        return cardData.cardType == CardType.Special;;
+    }
+
+    
+    private bool IsCardTacticOrSpecial()
+    {
+        return IsCardTactic() || IsCardSpecial();
     }
 
     IEnumerator CardScaleOnHover(bool reversed)
