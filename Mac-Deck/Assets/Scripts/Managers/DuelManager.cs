@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 [Serializable]
@@ -37,6 +37,9 @@ public class DuelManager : MonoBehaviour
     static DuelManager instance;
 
     public SNameGenerator nameGen;
+
+    public UnityEvent<BaseCard> OnCardSummoned;
+    public UnityEvent<BaseCard, int> OnCardHealthChanged;
 
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
     [SerializeField] private List<CardTarget> cardTargets = new List<CardTarget>(6);
@@ -134,6 +137,7 @@ public class DuelManager : MonoBehaviour
                 if (playerDuelLanes[i].occupied) return false;
 
                 SortOutHand(cardToPlay);
+                
                 StartCoroutine(LerpCardToPlace(cardToPlay, i));
                 return true;
             }
@@ -148,13 +152,16 @@ public class DuelManager : MonoBehaviour
         
         for (int i = 0; i < quantity; ++i)
         {
+            if (cardsInDeck.Count == 0) return;
+            
             BaseCard card = Instantiate(cardsInDeck[i], cardSpawn.position, cardSpawn.rotation);
             playerHand.Add(card);
             cardsInDeck.RemoveAt(i);
             StartCoroutine(LerpCardFromDeckToLocation(card, GetFirstUnoccupiedTargetTransform()));
         }
         
-        remainingCardsText.text = cardsInDeck.Count.ToString();
+        if (cardsInDeck.Count != 0)
+            remainingCardsText.text = cardsInDeck.Count.ToString();
     }
 
     IEnumerator LerpCardFromDeckToLocation(BaseCard card, Vector3 target)
@@ -193,6 +200,7 @@ public class DuelManager : MonoBehaviour
         card.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         
         playerDuelLanes[laneIndex].SetCardInLane(card);
+        OnCardSummoned?.Invoke(card);
         yield return null;
     }
 }

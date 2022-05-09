@@ -169,6 +169,9 @@ public class BaseCard : MonoBehaviour, CardInterface
     {
         cardHealth += delta;
 
+        int actualDelta = cardHealth - cardData.cardHealth;
+        
+        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, actualDelta);
         return cardHealth > 0;
     }
 
@@ -237,6 +240,8 @@ public class BaseCard : MonoBehaviour, CardInterface
     
     public virtual void CardEffect()
     {
+        //@ TODO: Figure out a way to implement different card effects
+        
         Destroy(gameObject);
     }
 }
