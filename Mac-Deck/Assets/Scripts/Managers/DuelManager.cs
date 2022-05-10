@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Random = System.Random;
 
 [Serializable]
 public class DuelLanes
@@ -77,6 +79,11 @@ public class DuelManager : MonoBehaviour
         {
             cardsInDeck.Add(card);
         }
+
+        Random rnd = new Random();
+        cardsInDeck = cardsInDeck.OrderBy(a => rnd.Next()).ToList(); 
+
+        remainingCardsText.text = cardsInDeck.Count.ToString();
     }
 
     private Vector3 GetFirstUnoccupiedTargetTransform()
