@@ -244,6 +244,10 @@ PrefabInstance:
       propertyPath: remainingCardsText
       value: 
       objectReference: {fileID: 4196449163639025317}
+    - target: {fileID: 6067236294318962092, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 4196449162719251735}
     - target: {fileID: 6630806039867828982, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
       propertyPath: m_Name
       value: DuelManager

@@ -5,6 +5,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Random = System.Random;
 
+/// <summary>
+/// A name generator for the basic cards
+/// </summary>
 [Serializable]
 public class SNameGenerator : MonoBehaviour
 {
