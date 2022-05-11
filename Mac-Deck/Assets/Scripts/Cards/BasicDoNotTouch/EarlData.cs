@@ -6,6 +6,7 @@ public class EarlData : ScriptableObject
 {
     public string earlName;
     public string earlSuffix;
+    public int earlHealth;
 
     [TextArea(3, 20)]
     public string earlDescription;

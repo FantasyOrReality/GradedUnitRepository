@@ -63,13 +63,15 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private Transform tacticUpperLimit;
     [SerializeField] private Transform tacticLowerLimit;
     [SerializeField] private Transform cardSpawn;
+    [SerializeField] private Transform earlTarget;
 
     [Space(10)]
     [Header("User Interface")]
     [SerializeField] private Text remainingCardsText;
-    [SerializeField] private TextMeshProUGUI earlNameAndSuffix;
-    [SerializeField] private EarlData selectedPlayerEarl;
-    [SerializeField] private Image earlImage;
+    
+    [Space(10)]
+    [Header("Earls")]
+    [SerializeField] private BaseEarl selectedPlayerEarl;
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
 
@@ -81,8 +83,6 @@ public class DuelManager : MonoBehaviour
     // This function sets up the board and the player deck, it also makes sure that the DuelManager is a SINGLETON
     private void Awake()
     {
-        GameObject.Instantiate(nameGen);
-        
         // Singleton PART Start
         if (instance != null)
         {
@@ -95,9 +95,13 @@ public class DuelManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
         }
         // Singleton PART End
+        
+        Instantiate(nameGen);
+        
+        selectedPlayerEarl = Instantiate(selectedPlayerEarl, earlTarget.position, earlTarget.rotation);
 
         // Set up the deck to be used based on the Earl
-        foreach (var card in selectedPlayerEarl.earlDeck.cardsInDeck)
+        foreach (var card in selectedPlayerEarl.GetEarlDeck())
         {
             cardsInDeck.Add(card);
         }
@@ -106,8 +110,6 @@ public class DuelManager : MonoBehaviour
 
         // Set up the User Interface
         remainingCardsText.text = cardsInDeck.Count.ToString();
-        earlImage.sprite = selectedPlayerEarl.earlImage;
-        earlNameAndSuffix.text = selectedPlayerEarl.earlName + "<br>" + selectedPlayerEarl.earlSuffix;
     }
 
     /// <summary>
