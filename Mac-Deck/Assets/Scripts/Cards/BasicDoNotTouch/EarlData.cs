@@ -12,4 +12,5 @@ public class EarlData : ScriptableObject
     public string earlDescription;
     public Sprite earlImage;
     public Deck earlDeck;
+    public GameObject earlEffect;
 }

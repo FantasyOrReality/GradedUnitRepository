@@ -21,7 +21,7 @@ public class DuelLanes
     public bool occupied;
     
     public BaseCard cardInLane;
-    
+
     public void SetCardInLane(BaseCard inCard)
     {
         cardInLane = inCard;
@@ -54,6 +54,9 @@ public class DuelManager : MonoBehaviour
     [HideInInspector]
     public UnityEvent<BaseCard, int> OnCardHealthChanged;
 
+    [HideInInspector] 
+    public UnityEvent<BaseEarl, int> OnEarlHealthChanged;
+
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
     [SerializeField] private List<CardTarget> cardTargets = new List<CardTarget>(6);
     private List<BaseCard> playerHand = new List<BaseCard>(6);
@@ -74,6 +77,8 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private BaseEarl selectedPlayerEarl;
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
+
+    private bool isDrawing = false;
 
     public static DuelManager GetInstance()
     {
@@ -168,8 +173,8 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.transform.position.x < tacticLowerLimit.position.x &&
                 cardToPlay.transform.position.y > tacticLowerLimit.position.y)
             {
+                cardToPlay.GetComponentInChildren<BaseCardEffect>().SpecialEffect();
                 SortOutHand(cardToPlay);
-                cardToPlay.CardEffect();
                 return true;
             }
         }
@@ -207,20 +212,36 @@ public class DuelManager : MonoBehaviour
     /// <param name="quantity">Integer value, how many cards to draw</param>
     public void DrawCardFromDeck(int quantity = 1)
     {
-        if (playerHand.Count >= 6) return;
+        if (isDrawing) return;
         
-        for (int i = 0; i < quantity; ++i)
+        StartCoroutine(DrawAndLerpCardFromDeckToLocation(GetFirstUnoccupiedTargetTransform(), quantity));
+    }
+
+    public List<BaseCard> GetAllFriendlyCardsOnField()
+    {
+        List<BaseCard> cardsOnField = new List<BaseCard>();
+        
+        for (int i = 0; i < playerDuelLanes.Count; i++)
         {
-            if (cardsInDeck.Count == 0) return;
-            
-            BaseCard card = Instantiate(cardsInDeck[i], cardSpawn.position, cardSpawn.rotation);
-            playerHand.Add(card);
-            cardsInDeck.RemoveAt(i);
-            StartCoroutine(LerpCardFromDeckToLocation(card, GetFirstUnoccupiedTargetTransform()));
+            if (playerDuelLanes[i].cardInLane != null)
+                cardsOnField.Add(playerDuelLanes[i].cardInLane);
         }
         
-        if (cardsInDeck.Count != 0)
-            remainingCardsText.text = cardsInDeck.Count.ToString();
+        return cardsOnField;
+    }
+    
+    public List<BaseCard> GetAllFriendlyCardsOnFieldOfType(CardType cardType)
+    {
+        List<BaseCard> cardsOnField = new List<BaseCard>();
+
+        for (int i = 0; i < playerDuelLanes.Count; i++)
+        {
+            if (playerDuelLanes[i].cardInLane.GetCardType() == cardType)
+                if (playerDuelLanes[i].cardInLane != null)
+                    cardsOnField.Add(playerDuelLanes[i].cardInLane);
+        }
+        
+        return cardsOnField;
     }
 
     /// <summary>
@@ -233,15 +254,20 @@ public class DuelManager : MonoBehaviour
         Random rnd = new Random();
         return deckToShuffle.OrderBy(a => rnd.Next()).ToList();
     }
-    
+
     /// <summary>
-    /// Lerp the card from the Deck to the required hand location, drawn from DrawCardFromDeck function
+    /// Draw and Lerp the card from the Deck to the required hand location
     /// </summary>
-    /// <param name="card">BaseCard type, card that is drawn</param>
     /// <param name="target">Vector3 type, the target to where the card should lerp to, usually a hand position</param>
+    /// <param name="quantity">Number of cards to Draw</param>
     /// <returns>null</returns>
-    IEnumerator LerpCardFromDeckToLocation(BaseCard card, Vector3 target)
+    IEnumerator DrawAndLerpCardFromDeckToLocation(Vector3 target, int quantity = 1)
     {
+        if (cardsInDeck.Count == 0) yield break;
+        if (playerHand.Count >= 6) yield break;
+
+        isDrawing = true;
+        BaseCard card = Instantiate(cardsInDeck[0], cardSpawn.position, cardSpawn.rotation);
         Vector3 initialPos = card.transform.position;
         float delta = 0;
 
@@ -251,10 +277,19 @@ public class DuelManager : MonoBehaviour
             delta += Time.deltaTime * 10f;
             yield return null;
         }
-        
+    
         card.transform.position = target;
         card.SetUp();
+        playerHand.Add(card);
+        cardsInDeck.RemoveAt(0);
         
+        if (cardsInDeck.Count != 0)
+            remainingCardsText.text = cardsInDeck.Count.ToString();
+        
+        if (quantity > 1)
+            StartCoroutine(DrawAndLerpCardFromDeckToLocation(GetFirstUnoccupiedTargetTransform(), quantity - 1));
+
+        isDrawing = false;
         yield return null;
     }
     

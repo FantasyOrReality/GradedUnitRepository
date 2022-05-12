@@ -19,4 +19,5 @@ public class BasicCardScriptable : ScriptableObject
     public int cardHealth;
     public CardType cardType;
     public Sprite CardImage;
+    public GameObject cardEffect;
 }

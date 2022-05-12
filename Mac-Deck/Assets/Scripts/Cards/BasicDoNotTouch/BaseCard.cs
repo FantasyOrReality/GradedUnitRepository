@@ -2,10 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Events;
 
-public class BaseCard : MonoBehaviour, CardInterface
+public class BaseCard : MonoBehaviour
 {
     [SerializeField] private BasicCardScriptable cardData;
+
+    [HideInInspector] 
+    public UnityEvent<BaseCard> OnCardSelected;
 
     private string cardName;
     private int cardStrength;
@@ -19,29 +23,39 @@ public class BaseCard : MonoBehaviour, CardInterface
     private Vector3 targetHoverCardScale;
     private Vector3 targetHoverCardLocation;
 
+    private GameObject cardEffect;
+
     private float hoverMinYoffset, hoverMaxYoffset;
     private float hoverYoffset = 350;
     private Coroutine cardHover;
+
+    [Space(10)] [Header("Some Card Stuff")] 
+    [SerializeField] private Image cardImage;
+    [SerializeField] public Image cardTemplate;
+
+    [SerializeField] private TextMeshProUGUI strengthText;
+    [SerializeField] private TextMeshProUGUI healthText;
+    [SerializeField] private TextMeshProUGUI descriptionText;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI typeText;
 
     // Basic Set up of the card, like adding images and text, saving variables and binding events for when it is clicked, hovered and so on
     private void Awake()
     {
         GetComponentInChildren<Canvas>().worldCamera = Camera.main;
 
-        foreach (var image in GetComponentsInChildren<Image>())
+        cardImage.sprite = cardData.CardImage;
+        strengthText.text = cardData.cardStrength.ToString();
+        healthText.text = cardData.cardHealth.ToString();
+        descriptionText.text = cardData.cardDescription;
+        nameText.text = IsCardTacticOrSpecial() ? cardData.cardName : SNameGenerator.GetInstance().GetRandomName();
+        typeText.text = CardTypeToString(cardData.cardType);
+        
+        if (cardData.cardEffect && IsCardTactic())
         {
-            if (image.CompareTag("Image")) image.sprite = cardData.CardImage;
+            cardEffect = Instantiate(cardData.cardEffect, transform);
         }
-
-        foreach (var text in GetComponentsInChildren<TextMeshProUGUI>())
-        {
-            if (text.CompareTag("Strength")) text.text = cardData.cardStrength.ToString();
-            else if (text.CompareTag("Health")) text.text = cardData.cardHealth.ToString();
-            else if (text.CompareTag("Description")) text.text = cardData.cardDescription;
-            else if (text.CompareTag("Name")) text.text = IsCardTacticOrSpecial() ? cardData.cardName : SNameGenerator.GetInstance().GetRandomName();
-            else if (text.CompareTag("Type")) text.text = CardTypeToString(cardData.cardType);
-        }
-
+        
         cardName = cardData.cardName;
         cardStrength = cardData.cardStrength;
         cardHealth = cardData.cardHealth;
@@ -98,7 +112,10 @@ public class BaseCard : MonoBehaviour, CardInterface
             transform.position = targetHoverCardLocation;
             transform.localScale = targetHoverCardScale;
             isCardSelected = true;
+            return;
         }
+        
+        OnCardSelected?.Invoke(this);
     }
 
     /// <summary>
@@ -119,10 +136,11 @@ public class BaseCard : MonoBehaviour, CardInterface
         {
             // If the card has been played, disable it's raycast targeting, so that we can no longer select it
             cardPlayed = true;
-            foreach (var image in GetComponentsInChildren<Image>())
+            if (cardData.cardEffect && !IsCardTactic())
             {
-                if (image.CompareTag("Template")) image.raycastTarget = false;
+                cardEffect = Instantiate(cardData.cardEffect, transform);
             }
+            cardTemplate.raycastTarget = false;
         }
     }
 
@@ -200,16 +218,23 @@ public class BaseCard : MonoBehaviour, CardInterface
     /// Applying health change to a card, then invoking a UnityEvent to let know other scripts that this card has had it's health changed
     /// </summary>
     /// <param name="delta">Can be a number, positive numbers increase the health, negative decrease it.</param>
-    /// <returns></returns>
+    /// <returns>Boolean, if health change has been applied</returns>
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
     public bool ApplyHealthChange(int delta)
     {
-        cardHealth += delta;
+        int previousHealth = cardHealth;
+        cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
+        string newHealth = cardHealth.ToString();
 
-        int actualDelta = cardHealth - cardData.cardHealth;
-        
-        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, actualDelta);
-        return cardHealth > 0;
+        if (cardHealth > cardData.cardHealth)
+        {
+            newHealth = "<color=green>" + cardHealth + "ˆ</color>";
+        }
+
+        healthText.text = newHealth;
+
+        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth);
+        return cardHealth != previousHealth;
     }
 
     /// <summary>
@@ -219,6 +244,14 @@ public class BaseCard : MonoBehaviour, CardInterface
     public void ApplyAttackChange(int delta)
     {
         cardStrength += delta;
+        string newStrength = cardStrength.ToString();
+
+        if (cardStrength > cardData.cardStrength)
+        {
+            newStrength = "<color=yellow>" + cardStrength + "ˆ</color>";
+        }
+        
+        strengthText.text = newStrength;
     }
     
     /// <summary>
@@ -281,15 +314,5 @@ public class BaseCard : MonoBehaviour, CardInterface
         isCardReturningToPos = false;
         CardHoverExit();
         yield return null;
-    }
-    
-    /// <summary>
-    /// Most likely will need to be removed
-    /// </summary>
-    public virtual void CardEffect()
-    {
-        //@ TODO: Figure out a way to implement different card effects
-        
-        Destroy(gameObject);
     }
 }
