@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dabf02d8f2b163544b90bdb7a173108f, type: 3}
-  m_Name: Macbeth
+  m_Name: Duncan
   m_EditorClassIdentifier: 
-  earlName: Macbeth
-  earlSuffix: The Brave
-  earlHealth: 25
-  earlDescription: MacBeth is a badass!
+  earlName: Duncan
+  earlSuffix: The Kind
+  earlHealth: 30
+  earlDescription: Good man!
   earlImage: {fileID: 21300000, guid: 895c5678167d95549bec63cadaf172cf, type: 3}
-  earlDeck: {fileID: 11400000, guid: 190df098e51965740b15f55743d8ad60, type: 2}
-  earlEffect: {fileID: 0}
+  earlDeck: {fileID: 11400000, guid: 32dd4f034f05afe4296de5848a0388cb, type: 2}
+  earlEffect: {fileID: 7115115627956922924, guid: b8057524ff95b094b9a2fb540b671b2d, type: 3}

@@ -20,4 +20,5 @@ public class BasicCardScriptable : ScriptableObject
     public CardType cardType;
     public Sprite CardImage;
     public GameObject cardEffect;
+    public bool autoExecuteEffect = false;
 }

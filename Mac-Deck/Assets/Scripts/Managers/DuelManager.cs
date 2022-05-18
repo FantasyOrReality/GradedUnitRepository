@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using TMPro;
 using Random = System.Random;
 
 /// <summary>
@@ -163,7 +162,7 @@ public class DuelManager : MonoBehaviour
     /// </summary>
     /// <param name="cardToPlay">BaseCard type, card to be played</param>
     /// <returns>Boolean, true when the card can be played and false when it can not be</returns>
-    public bool TryPlayCard(BaseCard cardToPlay)
+    public bool TryPlayCard(BaseCard cardToPlay, bool executeEffect = false)
     {
         // Check if the card is a tactic and if so use the tactic card limits
         if (cardToPlay.IsCardTactic())
@@ -194,8 +193,7 @@ public class DuelManager : MonoBehaviour
 
                     // Else we sort out the hand and play the card
                     SortOutHand(cardToPlay);
-                
-                    StartCoroutine(LerpCardToPlace(cardToPlay, i));
+                    StartCoroutine(LerpCardToPlace(cardToPlay, i, executeEffect));
                     return true;
                 }
             
@@ -204,6 +202,18 @@ public class DuelManager : MonoBehaviour
         
         // Return FALSE, letting the card know that it can not be played
         return false;
+    }
+
+    public void PlayCardOnNextFreeLane(BaseCard cardToPlay, bool executeEffect = false)
+    {
+        for (int i = 0; i < playerDuelLanes.Count; i++)
+        {
+            if (!playerDuelLanes[i].occupied)
+            {
+                StartCoroutine(LerpCardToPlace(cardToPlay, i, executeEffect));
+                return;
+            }
+        }
     }
 
     /// <summary>
@@ -299,7 +309,7 @@ public class DuelManager : MonoBehaviour
     /// <param name="card">BaseCard type, the card that needs to be moved</param>
     /// <param name="laneIndex">Integer, the index of lane the card should move to</param>
     /// <returns>null</returns>
-    IEnumerator LerpCardToPlace(BaseCard card, int laneIndex)
+    IEnumerator LerpCardToPlace(BaseCard card, int laneIndex, bool executeEffect = false)
     {
         float delta = 0;
         Vector3 initialCardPos = card.transform.position;

@@ -18,7 +18,8 @@ public class BaseCard : MonoBehaviour
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
     private bool cardPlayed = false;
-    
+    private bool canBeAttacked = true;
+
     private Vector3 initialCardPosition;
     private Vector3 targetHoverCardScale;
     private Vector3 targetHoverCardLocation;
@@ -127,7 +128,7 @@ public class BaseCard : MonoBehaviour
         
         
         isCardSelected = false;
-        if (!DuelManager.GetInstance().TryPlayCard(this))
+        if (!DuelManager.GetInstance().TryPlayCard(this, cardData.autoExecuteEffect))
         {
             // If the card can not be played, return it to it's original position
             StartCoroutine(ReturnCardToPosition());
@@ -209,9 +210,24 @@ public class BaseCard : MonoBehaviour
         return cardStrength;
     }
 
+    public bool CanCardBeAttacked()
+    {
+        return canBeAttacked;
+    }
+
+    public void SetCanBeAttacked(bool newState)
+    {
+        canBeAttacked = newState;
+    }
+
     public CardType GetCardType()
     {
         return cardData.cardType;
+    }
+
+    public string GetCardName()
+    {
+        return cardData.cardName;
     }
     
     /// <summary>
@@ -230,10 +246,10 @@ public class BaseCard : MonoBehaviour
         {
             newHealth = "<color=green>" + cardHealth + "ˆ</color>";
         }
-
+        
         healthText.text = newHealth;
 
-        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth);
+        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth);
         return cardHealth != previousHealth;
     }
 

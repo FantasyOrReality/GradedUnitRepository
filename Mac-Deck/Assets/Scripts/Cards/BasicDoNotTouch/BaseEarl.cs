@@ -20,9 +20,10 @@ public class BaseEarl : MonoBehaviour
         GetComponentInChildren<Image>().sprite = earlData.earlImage;
         GetComponentInChildren<TextMeshProUGUI>().text = GetEarlNameAndSuffix();
 
-        if (earlEffect)
+        if (earlData.earlEffect != null)
         {
             earlEffect = Instantiate(earlData.earlEffect, transform);
+            earlEffect.GetComponent<BaseEarlEffect>().SetUp();
         }
     }
 
