@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,7 +51,7 @@ public class PriestEffect : BaseCardEffect
     
     public override void SpecialEffect()
     {
-        if (usedThisTurn) return;
+        if (usedThisTurn || DuelManager.GetInstance().GetDuelPhase() != DuelPhase.MainPhase) return;
         
         Image img = gameObject.GetComponentInChildren<Image>();
         if (img)

@@ -15,12 +15,15 @@ public class BaseCard : MonoBehaviour
     private string cardName;
     private int cardStrength;
     private int cardHealth;
+    private int tempHealth;
+    private int tempAttack;
     
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
     private bool cardPlayed = false;
     private bool canBeAttacked = true;
     private bool isPlayerCard = true;
+    private bool isCardSetToAttack = false;
 
     private Vector3 initialCardPosition;
     private Vector3 targetHoverCardScale;
@@ -41,6 +44,7 @@ public class BaseCard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI typeText;
+    [SerializeField] private GameObject attackUI;
 
     // Basic Set up of the card, like adding images and text, saving variables and binding events for when it is clicked, hovered and so on
     private void Awake()
@@ -68,6 +72,8 @@ public class BaseCard : MonoBehaviour
         cardButton.OnReleasedEvent.AddListener(PlayCard);
         cardButton.OnHoverEnter.AddListener(CardHoverEnter);
         cardButton.OnHoverExit.AddListener(CardHoverExit);
+
+        DuelManager.GetInstance().OnTurnEnded.AddListener(OnTurnEnded);
     }
     
     /// <summary>
@@ -245,6 +251,17 @@ public class BaseCard : MonoBehaviour
         return isPlayerCard;
     }
 
+    public void SetShouldCardAttack(bool newValue)
+    {
+        isCardSetToAttack = newValue;
+        attackUI.SetActive(isCardSetToAttack);
+    }
+
+    public bool GetIsCardSetToAttack()
+    {
+        return isCardSetToAttack;
+    }
+
     /// <summary>
     /// Flips the Health and Attack stats of the card
     /// </summary>
@@ -252,14 +269,16 @@ public class BaseCard : MonoBehaviour
     {
         (cardHealth, cardStrength) = (cardStrength, cardHealth);
     }
-    
+
     /// <summary>
     /// Applying health change to a card, then invoking a UnityEvent to let know other scripts that this card has had it's health changed
     /// </summary>
     /// <param name="delta">Can be a number, positive numbers increase the health, negative decrease it.</param>
+    /// <param name="onlyThisTurn">Should the effect only last this turn</param>
+    /// <param name="fromTempEffect">Was this function called to remove the temporary effects</param>
     /// <returns>Boolean, if health change has been applied</returns>
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
-    public bool ApplyHealthChange(int delta)
+    public bool ApplyHealthChange(int delta, bool onlyThisTurn = true, bool fromTempEffect = false)
     {
         int previousHealth = cardHealth;
         cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
@@ -272,7 +291,13 @@ public class BaseCard : MonoBehaviour
         
         healthText.text = newHealth;
 
-        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth, isPlayerCard);
+        if (cardHealth != previousHealth && onlyThisTurn)
+        {
+            tempHealth =+ delta;
+        }
+    
+        if (!fromTempEffect)
+            DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth, isPlayerCard);
 
         if (cardHealth == 0)
         {
@@ -286,17 +311,31 @@ public class BaseCard : MonoBehaviour
     /// Applying change in attack of the card, an example, can be Provision, which adds 1 to the card Attack
     /// </summary>
     /// <param name="delta">Can be a number, positive numbers increase attack, negative decrease it.</param>
-    public void ApplyAttackChange(int delta)
+    /// <param name="onlyThisTurn">Should the effect only last this turn</param>
+    public void ApplyAttackChange(int delta, bool onlyThisTurn = true)
     {
+        int previousStrength = cardStrength;
         cardStrength += delta;
         string newStrength = cardStrength.ToString();
 
+        
+        if (cardHealth != previousStrength && onlyThisTurn)
+        {
+            tempAttack =+ delta;
+        }
+        
         if (cardStrength > cardData.cardStrength)
         {
             newStrength = "<color=yellow>" + cardStrength + "ˆ</color>";
         }
         
         strengthText.text = newStrength;
+    }
+
+    private void OnTurnEnded(bool wasPlayerTurn)
+    {
+        ApplyHealthChange(-tempHealth, false, true);
+        ApplyAttackChange(-tempAttack, false);
     }
 
     /// <summary>

@@ -10,6 +10,7 @@ using Random = System.Random;
 /// <summary>
 /// An enum used to determine the phase of the duel and evaluate the actions
 /// </summary>
+[Serializable]
 public enum DuelPhase
 {
     StartPhase,
@@ -31,7 +32,7 @@ public class DuelLanes
     public Transform snapPoint;
 
     public bool occupied;
-    
+
     public BaseCard cardInLane;
 
     public void SetCardInLane(BaseCard inCard)
@@ -72,9 +73,11 @@ public class DuelManager : MonoBehaviour
     [HideInInspector] 
     public UnityEvent<BaseEarl, int, bool> OnEarlHealthChanged;
 
+    [HideInInspector] 
+    public UnityEvent<bool> OnTurnEnded;
     
     [Space(10)]
-    [Header("AI Targets")]
+    [Header("Player Targets")]
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
     [SerializeField] private List<CardTarget> cardTargets = new List<CardTarget>(6);
     private List<BaseCard> playerHand = new List<BaseCard>(6);
@@ -93,6 +96,8 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private Transform tacticLowerLimit;
     [SerializeField] private Transform cardSpawn;
     [SerializeField] private Transform earlTarget;
+    [SerializeField] private Transform aiEarlTarget;
+    [SerializeField] private Transform aiCardSpawn;
 
     
     [Space(10)]
@@ -107,6 +112,7 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private BaseEarl AIEarl;
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
+    private List<BaseCard> aiCardsInDeck = new List<BaseCard>(25);
     
     private bool isDrawing = false;
     private DuelPhase duelPhase = DuelPhase.StartPhase;
@@ -212,7 +218,7 @@ public class DuelManager : MonoBehaviour
     /// <returns>Boolean, true when the card can be played and false when it can not be</returns>
     public bool TryPlayCard(BaseCard cardToPlay, bool executeEffect = false)
     {
-        if (duelPhase != DuelPhase.MainPhase) return false;
+        if (duelPhase != DuelPhase.MainPhase || duelPhase == DuelPhase.StartPhase) return false;
         
         // Check if the card is a tactic and if so use the tactic card limits
         if (cardToPlay.IsCardTactic())
@@ -297,6 +303,26 @@ public class DuelManager : MonoBehaviour
     {
         return selectedPlayerEarl;
     }
+
+    public void SetPlayerEarl(BaseEarl earlToSet)
+    {
+        selectedPlayerEarl = earlToSet;
+    }
+
+    public BaseEarl GetAIEarl()
+    {
+        return AIEarl;
+    }
+
+    public void SetAIEarl(BaseEarl earlToSet)
+    {
+        AIEarl = earlToSet;
+    }
+
+    public DuelPhase GetDuelPhase()
+    {
+        return duelPhase;
+    }
     
     /// <summary>
     /// Changes the duel phase to a new one and stores the previous one in a variable
@@ -308,16 +334,76 @@ public class DuelManager : MonoBehaviour
         duelPhase = newPhase;
     }
 
+    /// <summary>
+    /// Switches to combat state
+    /// </summary>
     public void SwitchToCombatState()
     {
-        if (duelPhase == DuelPhase.AIPhase) return;
+        if (duelPhase == DuelPhase.AIPhase || duelPhase == DuelPhase.StartPhase) return;
 
+        if (duelPhase == DuelPhase.CombatPhase) 
+        {
+            ChangeDuelPhase(DuelPhase.MainPhase);
+            foreach (var duelLane in playerDuelLanes)
+            {
+                if (duelLane.occupied)
+                {
+                    duelLane.cardInLane.cardTemplate.raycastTarget = false;
+                    if (duelLane.cardInLane.GetCardName() != "The Priest")
+                        duelLane.cardInLane.OnCardSelected.RemoveListener(SetCardToAttack);
+                }
+            }
+            return;
+        }
+        
+        ChangeDuelPhase(DuelPhase.CombatPhase);
         foreach (var duelLane in playerDuelLanes)
         {
             if (duelLane.occupied)
             {
                 duelLane.cardInLane.cardTemplate.raycastTarget = true;
+                if (duelLane.cardInLane.GetCardName() != "The Priest")
+                    duelLane.cardInLane.OnCardSelected.AddListener(SetCardToAttack);
             }
+        }
+    }
+
+    /// <summary>
+    /// Ends the current turn
+    /// </summary>
+    /// <param name="aiEndingTurn">If the AI is the one ending the turn</param>
+    public void EndTurn(bool aiEndingTurn = false)
+    {
+        for (int i = 0; i < playerDuelLanes.Count; i++)
+        {
+            if (playerDuelLanes[i].occupied)
+            {
+                int damage = -playerDuelLanes[i].cardInLane.GetCardStrength();
+                if (aiDuelLanes[i].occupied)
+                {
+                    aiDuelLanes[i].cardInLane.ApplyHealthChange(damage);
+                }
+                else AIEarl.ApplyHealthChange(damage);
+            }
+
+            if (aiDuelLanes[i].occupied)
+            {
+                int damage = -aiDuelLanes[i].cardInLane.GetCardStrength();
+                if (playerDuelLanes[i].occupied)
+                {
+                    playerDuelLanes[i].cardInLane.ApplyHealthChange(damage);
+                }
+                else selectedPlayerEarl.ApplyHealthChange(damage);
+            }
+        }
+        
+        if (duelPhase != DuelPhase.AIPhase)
+        {
+            duelPhase = DuelPhase.AIPhase;
+        }
+        else if (aiEndingTurn)
+        {
+            DrawCardFromDeck();
         }
     }
 
@@ -330,6 +416,11 @@ public class DuelManager : MonoBehaviour
     {
         Random rnd = new Random();
         return deckToShuffle.OrderBy(a => rnd.Next()).ToList();
+    }
+
+    private void SetCardToAttack(BaseCard card)
+    {
+        card.SetShouldCardAttack(!card.GetIsCardSetToAttack());
     }
 
     /// <summary>
