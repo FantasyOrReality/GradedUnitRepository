@@ -280,6 +280,7 @@ public class BaseCard : MonoBehaviour
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
     public bool ApplyHealthChange(int delta, bool onlyThisTurn = true, bool fromTempEffect = false)
     {
+        // @TODO: Figure out why do temporary buffs not work
         int previousHealth = cardHealth;
         cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
         string newHealth = cardHealth.ToString();

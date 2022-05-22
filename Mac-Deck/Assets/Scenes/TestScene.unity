@@ -452,6 +452,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5596384390540053290, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
+      propertyPath: aiDuelLanes.Array.data[0].cardInLane
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 6067236294318962092, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
       propertyPath: m_Camera
       value: 
