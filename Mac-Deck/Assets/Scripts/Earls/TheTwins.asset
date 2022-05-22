@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dabf02d8f2b163544b90bdb7a173108f, type: 3}
-  m_Name: MacBeth
+  m_Name: TheTwins
   m_EditorClassIdentifier: 
-  earlName: Macbeth
-  earlSuffix: The Brave
-  earlHealth: 25
-  earlDescription: MacBeth is a badass!
+  earlName: Brusi and Siggurdson
+  earlSuffix: The Twins
+  earlHealth: 20
+  earlDescription: Sneaky man!
   earlImage: {fileID: 21300000, guid: 895c5678167d95549bec63cadaf172cf, type: 3}
-  earlDeck: {fileID: 11400000, guid: 190df098e51965740b15f55743d8ad60, type: 2}
-  earlEffect: {fileID: 7115115627956922924, guid: c74dd651668cebf4fa6ded9202f8cdf1, type: 3}
+  earlDeck: {fileID: 11400000, guid: fdfec61006c8e514691859c7693647b6, type: 2}
+  earlEffect: {fileID: 7115115627956922924, guid: 54e7b16d36c229943b30eb1b58442d5a, type: 3}

@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 7632099450278227986}
   - component: {fileID: 4834462494120634055}
   m_Layer: 0
-  m_Name: BaseEarl
+  m_Name: MacBethEarl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -354,4 +354,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1d587871d4dd564fb35ef647499e10d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  earlData: {fileID: 11400000, guid: 20c4407667e7b434d86332a0d708c882, type: 2}
+  earlData: {fileID: 11400000, guid: f25c07d97611a3e498808debcc2ae0a2, type: 2}

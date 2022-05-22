@@ -8,6 +8,19 @@ using UnityEngine.UI;
 using Random = System.Random;
 
 /// <summary>
+/// An enum used to determine the phase of the duel and evaluate the actions
+/// </summary>
+public enum DuelPhase
+{
+    StartPhase,
+    DrawingPhase,
+    MainPhase,
+    CombatPhase,
+    AIPhase,
+    None
+}
+
+/// <summary>
 /// Class used to define the DuelLanes, later more will be added here
 /// </summary>
 [Serializable]
@@ -48,17 +61,31 @@ public class DuelManager : MonoBehaviour
     public SNameGenerator nameGen;
 
     [HideInInspector]
-    public UnityEvent<BaseCard> OnCardSummoned;
+    public UnityEvent<BaseCard, bool> OnCardSummoned;
 
     [HideInInspector]
-    public UnityEvent<BaseCard, int> OnCardHealthChanged;
+    public UnityEvent<BaseCard, int, bool> OnCardHealthChanged;
 
     [HideInInspector] 
-    public UnityEvent<BaseEarl, int> OnEarlHealthChanged;
+    public UnityEvent<BaseCard, bool> OnCardDestroyed;
 
+    [HideInInspector] 
+    public UnityEvent<BaseEarl, int, bool> OnEarlHealthChanged;
+
+    
+    [Space(10)]
+    [Header("AI Targets")]
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
     [SerializeField] private List<CardTarget> cardTargets = new List<CardTarget>(6);
     private List<BaseCard> playerHand = new List<BaseCard>(6);
+    
+    
+    [Space(10)]
+    [Header("AI Targets")]
+    [SerializeField] private List<DuelLanes> aiDuelLanes = new List<DuelLanes>(4);
+    [SerializeField] private List<CardTarget> aiCardTargets = new List<CardTarget>(6);
+    private List<BaseCard> aiHand = new List<BaseCard>(6);
+
 
     [Space(10)]
     [Header("Transforms")]
@@ -67,17 +94,23 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private Transform cardSpawn;
     [SerializeField] private Transform earlTarget;
 
+    
     [Space(10)]
     [Header("User Interface")]
     [SerializeField] private Text remainingCardsText;
+    [SerializeField] private Text remainingCardsTextAI;
+    
     
     [Space(10)]
     [Header("Earls")]
     [SerializeField] private BaseEarl selectedPlayerEarl;
+    [SerializeField] private BaseEarl AIEarl;
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
-
+    
     private bool isDrawing = false;
+    private DuelPhase duelPhase = DuelPhase.StartPhase;
+    private DuelPhase previousDuelPhase = DuelPhase.None;
 
     public static DuelManager GetInstance()
     {
@@ -117,22 +150,36 @@ public class DuelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Finds the first target transform that does not have a card in it
+    /// Gets the first unoccupied target transform
     /// </summary>
-    /// <returns>Returns a position of where we can place the last card</returns>
-    private Vector3 GetFirstUnoccupiedTargetTransform()
+    /// <param name="isPlayerTargets">Is the player calling this function</param>
+    /// <returns>Vector3 type, the position the card should lerp to</returns>
+    private Vector3 GetFirstUnoccupiedTargetTransform(bool isPlayerTargets = true)
     {
-        for (int i = 0; i < cardTargets.Count; i++)
+        List<CardTarget> targets = isPlayerTargets ? cardTargets : aiCardTargets;
+
+        for (int i = 0; i < targets.Count; i++)
         {
-            if (!cardTargets[i].occupied)
+            if (!targets[i].occupied)
             {
-                cardTargets[i].SetIsOccupied(true);
-                return cardTargets[i].target.transform.position;
+                targets[i].SetIsOccupied(true);
+                return targets[i].target.transform.position;
             }
         }
 
-        cardTargets[0].SetIsOccupied(true);
-        return cardTargets[0].target.transform.position;
+        Vector3 targetToReturn;
+
+        if (isPlayerTargets)
+        {
+            cardTargets[0].SetIsOccupied(true);
+            targetToReturn = cardTargets[0].target.transform.position;
+        }
+        else
+        {
+            aiCardTargets[0].SetIsOccupied(true);
+            targetToReturn = aiCardTargets[0].target.transform.position;
+        }
+        return targetToReturn;
     }
 
     /// <summary>
@@ -161,9 +208,12 @@ public class DuelManager : MonoBehaviour
     /// Tries to play a card at the position it was released
     /// </summary>
     /// <param name="cardToPlay">BaseCard type, card to be played</param>
+    /// <param name="executeEffect">Should the card effect be executed</param>
     /// <returns>Boolean, true when the card can be played and false when it can not be</returns>
     public bool TryPlayCard(BaseCard cardToPlay, bool executeEffect = false)
     {
+        if (duelPhase != DuelPhase.MainPhase) return false;
+        
         // Check if the card is a tactic and if so use the tactic card limits
         if (cardToPlay.IsCardTactic())
         {
@@ -203,19 +253,7 @@ public class DuelManager : MonoBehaviour
         // Return FALSE, letting the card know that it can not be played
         return false;
     }
-
-    public void PlayCardOnNextFreeLane(BaseCard cardToPlay, bool executeEffect = false)
-    {
-        for (int i = 0; i < playerDuelLanes.Count; i++)
-        {
-            if (!playerDuelLanes[i].occupied)
-            {
-                StartCoroutine(LerpCardToPlace(cardToPlay, i, executeEffect));
-                return;
-            }
-        }
-    }
-
+    
     /// <summary>
     ///  Draws a card from the Deck and removes it from the List
     /// </summary>
@@ -223,7 +261,8 @@ public class DuelManager : MonoBehaviour
     public void DrawCardFromDeck(int quantity = 1)
     {
         if (isDrawing) return;
-        
+
+        ChangeDuelPhase(DuelPhase.DrawingPhase);
         StartCoroutine(DrawAndLerpCardFromDeckToLocation(GetFirstUnoccupiedTargetTransform(), quantity));
     }
 
@@ -252,6 +291,34 @@ public class DuelManager : MonoBehaviour
         }
         
         return cardsOnField;
+    }
+    
+    public BaseEarl GetPlayerEarl()
+    {
+        return selectedPlayerEarl;
+    }
+    
+    /// <summary>
+    /// Changes the duel phase to a new one and stores the previous one in a variable
+    /// </summary>
+    /// <param name="newPhase"></param>
+    public void ChangeDuelPhase(DuelPhase newPhase)
+    {
+        previousDuelPhase = duelPhase;
+        duelPhase = newPhase;
+    }
+
+    public void SwitchToCombatState()
+    {
+        if (duelPhase == DuelPhase.AIPhase) return;
+
+        foreach (var duelLane in playerDuelLanes)
+        {
+            if (duelLane.occupied)
+            {
+                duelLane.cardInLane.cardTemplate.raycastTarget = true;
+            }
+        }
     }
 
     /// <summary>
@@ -300,14 +367,16 @@ public class DuelManager : MonoBehaviour
             StartCoroutine(DrawAndLerpCardFromDeckToLocation(GetFirstUnoccupiedTargetTransform(), quantity - 1));
 
         isDrawing = false;
+        ChangeDuelPhase(DuelPhase.MainPhase);
         yield return null;
     }
-    
+
     /// <summary>
     /// Lerp the card into the duel lane position, where it was played at
     /// </summary>
     /// <param name="card">BaseCard type, the card that needs to be moved</param>
     /// <param name="laneIndex">Integer, the index of lane the card should move to</param>
+    /// <param name="executeEffect">Should the card effect be executed</param>
     /// <returns>null</returns>
     IEnumerator LerpCardToPlace(BaseCard card, int laneIndex, bool executeEffect = false)
     {
@@ -327,7 +396,8 @@ public class DuelManager : MonoBehaviour
         card.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         
         playerDuelLanes[laneIndex].SetCardInLane(card);
-        OnCardSummoned?.Invoke(card);
+        if (executeEffect) card.ExecuteCardEffect();
+        OnCardSummoned?.Invoke(card, card.GetIsPlayerCard());
         yield return null;
     }
 }

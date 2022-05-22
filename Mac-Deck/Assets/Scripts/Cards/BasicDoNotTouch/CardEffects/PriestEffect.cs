@@ -11,7 +11,12 @@ public class PriestEffect : BaseCardEffect
     private void Awake()
     {
         GetComponentInChildren<Canvas>().worldCamera = Camera.main;
-        transform.parent.gameObject.GetComponent<BaseCard>().OnCardSelected.AddListener(HealCard);
+        foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
+        {
+            card.OnCardSelected.AddListener(HealCard);
+        }
+
+        DuelManager.GetInstance().OnCardSummoned.AddListener(OnCardSummoned);
     }
 
     private void Update()
@@ -19,6 +24,12 @@ public class PriestEffect : BaseCardEffect
         if (selectingCard)
             if (Input.GetMouseButtonDown(1))
                 selectingCard = false;
+    }
+
+    private void OnCardSummoned(BaseCard card, bool isPlayerCard)
+    {
+        if (isPlayerCard == isThisPlayerCard)
+            card.OnCardSelected.AddListener(HealCard);
     }
 
     private void HealCard(BaseCard cardToHeal)

@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine.Events;
 
 public class BaseCard : MonoBehaviour
@@ -19,6 +20,7 @@ public class BaseCard : MonoBehaviour
     private bool isCardReturningToPos = false;
     private bool cardPlayed = false;
     private bool canBeAttacked = true;
+    private bool isPlayerCard = true;
 
     private Vector3 initialCardPosition;
     private Vector3 targetHoverCardScale;
@@ -116,7 +118,8 @@ public class BaseCard : MonoBehaviour
             return;
         }
         
-        OnCardSelected?.Invoke(this);
+        if (cardPlayed)
+            OnCardSelected?.Invoke(this);
     }
 
     /// <summary>
@@ -140,7 +143,9 @@ public class BaseCard : MonoBehaviour
             if (cardData.cardEffect && !IsCardTactic())
             {
                 cardEffect = Instantiate(cardData.cardEffect, transform);
+                cardEffect.GetComponent<BaseCardEffect>().SetOwningCard(this);
             }
+            
             cardTemplate.raycastTarget = false;
         }
     }
@@ -229,6 +234,24 @@ public class BaseCard : MonoBehaviour
     {
         return cardData.cardName;
     }
+
+    public void SetIsPlayerCard(bool newValue)
+    {
+        isPlayerCard = newValue;
+    }
+
+    public bool GetIsPlayerCard()
+    {
+        return isPlayerCard;
+    }
+
+    /// <summary>
+    /// Flips the Health and Attack stats of the card
+    /// </summary>
+    public void FlipStats()
+    {
+        (cardHealth, cardStrength) = (cardStrength, cardHealth);
+    }
     
     /// <summary>
     /// Applying health change to a card, then invoking a UnityEvent to let know other scripts that this card has had it's health changed
@@ -249,7 +272,13 @@ public class BaseCard : MonoBehaviour
         
         healthText.text = newHealth;
 
-        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth);
+        DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth, isPlayerCard);
+
+        if (cardHealth == 0)
+        {
+            DuelManager.GetInstance().OnCardDestroyed?.Invoke(this, isPlayerCard);
+            Destroy(gameObject, 0.25f);
+        }
         return cardHealth != previousHealth;
     }
 
@@ -268,6 +297,15 @@ public class BaseCard : MonoBehaviour
         }
         
         strengthText.text = newStrength;
+    }
+
+    /// <summary>
+    /// Executes the special effect of the card
+    /// </summary>
+    public void ExecuteCardEffect()
+    {
+        if (cardEffect)
+            cardEffect.GetComponent<BaseCardEffect>().SpecialEffect();
     }
     
     /// <summary>

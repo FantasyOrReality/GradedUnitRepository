@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 7632099450278227986}
   - component: {fileID: 4834462494120634055}
   m_Layer: 0
-  m_Name: BaseEarl
+  m_Name: Duncan
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

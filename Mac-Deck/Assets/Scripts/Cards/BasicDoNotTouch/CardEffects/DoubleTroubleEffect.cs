@@ -16,16 +16,18 @@ public class DoubleTroubleEffect : BaseCardEffect
 
     public override void SpecialEffect()
     {
-        BaseCard card = gameObject.GetComponentInChildren<BaseCard>();
-        card.ApplyHealthChange(1);
-        card.ApplyAttackChange(2);
+        owningCard.ApplyHealthChange(1);
+        owningCard.ApplyAttackChange(2);
     }
 
-    private void OnCardSummon(BaseCard card)
+    private void OnCardSummon(BaseCard card, bool isPlayerCard)
     {
-        if (card.GetCardType() == CardType.Special && card.GetCardName() == "Double Trouble")
+        if (isPlayerCard == isThisPlayerCard)
         {
-            SpecialEffect();
+            if (card.GetCardType() == CardType.Special && card.GetCardName() == "Double Trouble")
+            {
+                SpecialEffect();
+            }
         }
     }
 }

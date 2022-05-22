@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class SiwardEarlEffect : BaseEarlEffect
 {
     private int numLightUnits;
+    [SerializeField] private int attackToAdd = 1;
     
     public override void SetUp()
     {
@@ -17,13 +19,15 @@ public class SiwardEarlEffect : BaseEarlEffect
             if (card.GetCardName() == "Master Assassin")
             {
                 card.SetCanBeAttacked(false);
-                card.ApplyAttackChange(1);
+                card.ApplyAttackChange(attackToAdd);
             }
         }
     }
     
-    public void OnCardSummon(BaseCard card)
+    private void OnCardSummon(BaseCard card, bool isPlayer)
     {
+        if (isPlayer != isThisPlayerEarl) return;
+        
         if (card.GetCardType() == CardType.LSoldier || card.GetCardType() == CardType.Special && card.GetCardName() == "Master Assassin")
         {
             numLightUnits++;

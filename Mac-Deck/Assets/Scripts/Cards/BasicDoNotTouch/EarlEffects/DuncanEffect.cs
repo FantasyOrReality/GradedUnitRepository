@@ -4,6 +4,7 @@ using UnityEngine;
 public class DuncanEffect : BaseEarlEffect
 {
     private int numUnitsHealed;
+    [SerializeField] private int amountToHeal = 1;
     
     public override void SetUp()
     {
@@ -17,17 +18,21 @@ public class DuncanEffect : BaseEarlEffect
 
         foreach (var card in friendlyCardsOnField)
         {
-            card.ApplyHealthChange(1);
+            card.ApplyHealthChange(amountToHeal);
         }
     }
 
-    public void OnEarlHealthChanged(BaseEarl earl, int delta)
+    private void OnEarlHealthChanged(BaseEarl earl, int delta, bool isPlayer)
     {
+        if (isPlayer != isThisPlayerEarl) return;
+        
         CheckWasUnitHealed(delta);
     }
 
-    public void OnCardHealthChanged(BaseCard card, int delta)
+    private void OnCardHealthChanged(BaseCard card, int delta, bool isPlayer)
     {
+        if (isPlayer != card.GetIsPlayerCard()) return;
+        
         CheckWasUnitHealed(delta);
     }
 

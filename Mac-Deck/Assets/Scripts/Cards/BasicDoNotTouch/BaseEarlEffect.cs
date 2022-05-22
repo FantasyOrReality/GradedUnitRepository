@@ -1,8 +1,9 @@
 using UnityEngine;
 
-public class BaseEarlEffect : MonoBehaviour
+public class BaseEarlEffect : MonoBehaviour, SpecialAbilityInterface
 {
     protected bool usedThisTurn = false;
+    protected bool isThisPlayerEarl = true;
     
     public virtual void SetUp()
     {
@@ -17,5 +18,10 @@ public class BaseEarlEffect : MonoBehaviour
     public void ResetAfterTurn()
     {
         usedThisTurn = false;
+    }
+    
+    public void SetIsThisPlayerEarl(bool newValue)
+    {
+        isThisPlayerEarl = newValue;
     }
 }

@@ -9,6 +9,7 @@ public class BaseEarl : MonoBehaviour
 {
     [SerializeField] private EarlData earlData;
     private GameObject earlEffect;
+    private bool isPlayerEarl = true;
 
     private int currHealth;
     
@@ -37,8 +38,18 @@ public class BaseEarl : MonoBehaviour
         int previousHealth = currHealth;
         currHealth = Mathf.Clamp(currHealth + delta, 0, 100);
 
-        DuelManager.GetInstance().OnEarlHealthChanged?.Invoke(this, currHealth);
+        DuelManager.GetInstance().OnEarlHealthChanged?.Invoke(this, currHealth, isPlayerEarl);
         return currHealth != previousHealth;
+    }
+
+    public bool IsPlayer()
+    {
+        return isPlayerEarl;
+    }
+    
+    public void SetIsPlayer(bool newValue)
+    {
+        isPlayerEarl = newValue;
     }
     
     /// <summary>
