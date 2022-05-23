@@ -215,6 +215,11 @@ public class DuelManager : MonoBehaviour
         return targetToReturn;
     }
 
+    /// <summary>
+    /// Frees the lane with specified index
+    /// </summary>
+    /// <param name="laneIndex">Integer type, the index of the line to be freed</param>
+    /// <param name="playerLane">Boolean type, is this part of a player lane</param>
     public void FreeLane(int laneIndex, bool playerLane)
     {
         if (playerLane)
@@ -251,6 +256,10 @@ public class DuelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fixes the position of the cards after you play one
+    /// </summary>
+    /// <param name="cardPlayed">BaseCard type,card played from the hand</param>
     private void AISortOutHand(BaseCard cardPlayed)
     {
         aiHand.Remove(cardPlayed);
@@ -479,7 +488,7 @@ public class DuelManager : MonoBehaviour
     {
         card.SetShouldCardAttack(!card.GetIsCardSetToAttack());
     }
-
+    
     private void OnEarlHealthChangedInternal(BaseEarl earl, int delta, bool playerEarl)
     {
         if (earl.GetHealth() == 0)
@@ -524,6 +533,14 @@ public class DuelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Lerps the card to attacks and applies the health change
+    /// </summary>
+    /// <param name="dl1">List of DuelLanes type, the duel lane to attack from</param>
+    /// <param name="dl2">List of DuelLanes type, the duel lane to be attacked</param>
+    /// <param name="index">Integer type, index of the duel lanes</param>
+    /// <param name="aiEndingTurn">Boolean type, did ai end the turn</param>
+    /// <returns></returns>
     IEnumerator LerpCardAttacks(List<DuelLanes> dl1, List<DuelLanes> dl2, int index, bool aiEndingTurn = false)
     {
         if (!dl1[index].occupied)
@@ -661,7 +678,6 @@ public class DuelManager : MonoBehaviour
     }
 
     #region AI
-    
     IEnumerator AIStartTurn()
     {
         StartCoroutine(AIDrawCard());
