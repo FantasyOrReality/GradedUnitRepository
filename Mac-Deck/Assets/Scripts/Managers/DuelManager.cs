@@ -215,6 +215,20 @@ public class DuelManager : MonoBehaviour
         return targetToReturn;
     }
 
+    public void FreeLane(int laneIndex, bool playerLane)
+    {
+        if (playerLane)
+        {
+            playerDuelLanes[laneIndex].occupied = false;
+            playerDuelLanes[laneIndex].cardInLane = null;
+        }
+        else
+        {
+            aiDuelLanes[laneIndex].occupied = false;
+            aiDuelLanes[laneIndex].cardInLane = null;
+        }
+    }
+
     /// <summary>
     /// Fixes the position of the cards after you play one
     /// </summary>
@@ -422,7 +436,7 @@ public class DuelManager : MonoBehaviour
     /// </summary>
     public void SwitchToCombatState()
     {
-        if (duelPhase == DuelPhase.AIPhase || duelPhase == DuelPhase.StartPhase) return;
+        if (duelPhase == DuelPhase.AIPhase || duelPhase == DuelPhase.StartPhase || duelPhase == DuelPhase.DrawingPhase) return;
 
         if (duelPhase == DuelPhase.CombatPhase) 
         {
@@ -450,57 +464,7 @@ public class DuelManager : MonoBehaviour
             }
         }
     }
-
-    /// <summary>
-    /// Ends the current turn
-    /// </summary>
-    /// <param name="aiEndingTurn">If the AI is the one ending the turn</param>
-    public void EndTurn(bool aiEndingTurn = false)
-    {
-        // @TODO: Add visual polish if there is enough time
-        if (duelPhase != DuelPhase.AIPhase)
-        {
-            duelPhase = DuelPhase.AIPhase;
-            for (int i = 0; i < playerDuelLanes.Count; i++)
-            {
-                if (playerDuelLanes[i].occupied && playerDuelLanes[i].cardInLane.GetIsCardSetToAttack())
-                {
-                    if (aiDuelLanes[i].occupied)
-                    {
-                        StartCoroutine(LerpCardAttack(playerDuelLanes[i].cardInLane, aiDuelLanes[i].cardInLane));
-                    }
-                    else StartCoroutine(LerpCardAttack(playerDuelLanes[i].cardInLane, AIEarl));
-
-                    playerDuelLanes[i].cardInLane.SetShouldCardAttack(false);
-                }
-            }
-            OnTurnEnded?.Invoke(true);
-            StartCoroutine(AIStartTurn());
-        }
-        else if (aiEndingTurn)
-        {
-            DrawCardFromDeck();
-            for (int i = 0; i < aiDuelLanes.Count; i++)
-            {
-                if (aiDuelLanes[i].occupied && playerDuelLanes[i].cardInLane.GetIsCardSetToAttack())
-                {
-                    if (playerDuelLanes[i].occupied)
-                    {
-                        StartCoroutine(LerpCardAttack(aiDuelLanes[i].cardInLane, playerDuelLanes[i].cardInLane));
-                    }
-                    else StartCoroutine(LerpCardAttack(aiDuelLanes[i].cardInLane, selectedPlayerEarl));
-
-                    aiDuelLanes[i].cardInLane.SetShouldCardAttack(false);
-                }
-            }
-
-            numUnitsSummoned = 0;
-            numTacticCardsPlayed = 0;
-
-            OnTurnEnded?.Invoke(false);
-        }
-    }
-
+    
     /// <summary>
     /// Shuffles the deck randomly
     /// </summary>
@@ -534,59 +498,97 @@ public class DuelManager : MonoBehaviour
     {
         
     }
-
-    IEnumerator LerpCardAttack(BaseCard card, BaseCard target)
+    
+    /// <summary>
+    /// Ends the current turn
+    /// </summary>
+    /// <param name="aiEndingTurn">If the AI is the one ending the turn</param>
+    public void EndTurn(bool aiEndingTurn = false)
     {
+        if (duelPhase == DuelPhase.CombatPhase)
+        {
+            SwitchToCombatState();
+        }
+        
+        if (!aiEndingTurn)
+        {
+            ChangeDuelPhase(DuelPhase.AIPhase);
+            StartCoroutine(LerpCardAttacks(playerDuelLanes, aiDuelLanes, 0, aiEndingTurn));
+        }
+        else if (aiEndingTurn)
+        {
+            DrawCardFromDeck();
+            numUnitsSummoned = 0;
+            numTacticCardsPlayed = 0;
+            StartCoroutine(LerpCardAttacks(aiDuelLanes, playerDuelLanes, 0, aiEndingTurn));
+        }
+    }
+
+    IEnumerator LerpCardAttacks(List<DuelLanes> dl1, List<DuelLanes> dl2, int index, bool aiEndingTurn = false)
+    {
+        if (!dl1[index].occupied)
+        {
+            if (index + 1 < playerDuelLanes.Count)
+                StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
+            
+            yield break;
+        }
+        
+        BaseCard card = dl1[index].cardInLane;
+
         Vector3 initialPos = card.transform.position;
-        Vector3 targetPos = target.transform.position;
-        float delta = 0;
 
-        while (delta < 1)
+        if (dl1[index].cardInLane.GetIsCardSetToAttack())
         {
-            card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
-            delta += Time.deltaTime * 3.0f;
-            yield return null;
-        }
-        target.ApplyHealthChange(-card.GetCardStrength());
+            Vector3 targetPos;
+            if (dl2[index].occupied)
+                targetPos = dl2[index].cardInLane.transform.position;
+            else if (aiEndingTurn)
+                targetPos = selectedPlayerEarl.transform.position;
+            else
+                targetPos = AIEarl.transform.position;
 
-        while (delta > 0)
+            float delta = 0;
+
+            while (delta < 1)
+            {
+                card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
+                delta += Time.deltaTime * 3.0f;
+                yield return null;
+            }
+
+            if (dl2[index].occupied)
+                dl2[index].cardInLane.ApplyHealthChange(-card.GetCardStrength(), false);
+            else if (aiEndingTurn)
+                selectedPlayerEarl.ApplyHealthChange(-card.GetCardStrength());
+            else
+                AIEarl.ApplyHealthChange(-card.GetCardStrength());
+
+            dl1[index].cardInLane.SetShouldCardAttack(false);
+
+            while (delta > 0)
+            {
+                card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
+                delta -= Time.deltaTime * 3.0f;
+                yield return null;
+            }
+        
+            card.transform.position = initialPos;
+        }
+        
+        if (index + 1 < playerDuelLanes.Count)
+            StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
+        
+        OnTurnEnded?.Invoke(!aiEndingTurn);
+        
+        if (!aiEndingTurn)
         {
-            card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
-            delta -= Time.deltaTime * 3.0f;
-            yield return null;
+            StartCoroutine(AIStartTurn());
         }
-
-        card.transform.position = initialPos;
         
         yield return null;
     }
-
-    IEnumerator LerpCardAttack(BaseCard card, BaseEarl target)
-    {
-        Vector3 initialPos = card.transform.position;
-        Vector3 targetPos = target.transform.position;
-        float delta = 0;
-
-        while (delta < 1)
-        {
-            card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
-            delta += Time.deltaTime * 5.0f;
-            yield return null;
-        }
-        target.ApplyHealthChange(-card.GetCardStrength());
-
-        while (delta > 0)
-        {
-            card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
-            delta -= Time.deltaTime * 5.0f;
-            yield return null;
-        }
-        
-        card.transform.position = initialPos;
-        
-        yield return null;
-    }
-
+    
     /// <summary>
     /// Draw and Lerp the card from the Deck to the required hand location
     /// </summary>
@@ -649,7 +651,9 @@ public class DuelManager : MonoBehaviour
 
         card.transform.position = playerDuelLanes[laneIndex].snapPoint.transform.position;
         card.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        
+
+        card.GetComponentInChildren<Canvas>().sortingOrder = 1;
+        card.SetLaneIndex(laneIndex);
         playerDuelLanes[laneIndex].SetCardInLane(card);
         if (executeEffect) card.ExecuteCardEffect();
         OnCardSummoned?.Invoke(card, card.GetIsPlayerCard());
@@ -680,7 +684,7 @@ public class DuelManager : MonoBehaviour
                 delta += Time.deltaTime * 10f;
                 yield return null;
             }
-
+            
             card.transform.position = target;
             card.SetUp(false);
             aiHand.Add(card);
@@ -704,26 +708,45 @@ public class DuelManager : MonoBehaviour
         bool hasTacticInHand = DoesAIHaveTacticCardsInHand();
         bool playedTacticThisTurn = false;
         
-        if (hasUnitsInHand)
+        if (hasUnitsInHand && numUnitsSummoned < maxUnitsSummonedPerTurn)
         {
-            
             int laneIndex = GetLaneIndexThatMakesSense();
             BaseCard cardToPlay = GetInfantryCardToPlay(laneIndex);
-            
-            Debug.Log(laneIndex);
-            
-            if (cardToPlay && !aiDuelLanes[laneIndex].occupied)
+
+            if (cardToPlay != null && !aiDuelLanes[laneIndex].occupied && numUnitsSummoned < maxUnitsSummonedPerTurn)
             {
                 cardToPlay.AIPlayedCard();
                 float delta = 0;
                 Vector3 initialPos = cardToPlay.transform.position;
+                cardToPlay.GetComponentInChildren<Canvas>().sortingOrder = 1;
+                cardToPlay.SetLaneIndex(laneIndex);
                 AISortOutHand(cardToPlay);
+                aiDuelLanes[laneIndex].occupied = true;
+                aiDuelLanes[laneIndex].cardInLane = cardToPlay;
+                numUnitsSummoned++;
 
                 while (delta < 1)
                 {
                     cardToPlay.transform.position = Vector3.Lerp(initialPos, aiDuelLanes[laneIndex].snapPoint.position, delta);
                     delta += Time.deltaTime * 10f;
                     yield return null;
+                }
+            }
+
+            if (numUnitsSummoned < maxUnitsSummonedPerTurn)
+            {
+                if (IsHandFullWithNoInfantry())
+                {
+                    foreach (var card in aiHand)
+                    {
+                        if (card.IsCardTactic() && !playedTacticThisTurn)
+                        {
+                            card.GetCardEffect().SpecialEffect();
+                            AISortOutHand(card);
+                            playedTacticThisTurn = true;
+                            yield break;
+                        }
+                    }
                 }
             }
         }
@@ -760,24 +783,15 @@ public class DuelManager : MonoBehaviour
             
             if (aiDuelLanes[i].occupied)
             {
-                if (errorInt < aiSmartMoveChance)
+                if (errorInt < aiSmartMoveChance && aiDuelLanes[i].cardInLane.GetCardName() != "The Priest")
                 {
-                    if (!playerDuelLanes[i].occupied || aiDuelLanes[i].cardInLane.GetCardStrength() >
-                        playerDuelLanes[i].cardInLane.GetCardStrength())
-                    {
-                        aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
-                        yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
-                    }
+                    aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
+                    yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
 
                 }
                 else
                 {
-                    if (playerDuelLanes[i].occupied && aiDuelLanes[i].cardInLane.GetCardStrength() <
-                        playerDuelLanes[i].cardInLane.GetCardStrength())
-                    {
-                        aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
-                        yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
-                    }
+                    aiDuelLanes[i].cardInLane.SetShouldCardAttack(false);
                 }
             }
         }
@@ -845,6 +859,20 @@ public class DuelManager : MonoBehaviour
         return shouldPlay;
     }
 
+    private bool IsHandFullWithNoInfantry()
+    {
+        bool hasInfantry = false;
+        bool handFull = aiHand.Count == 6;
+
+        foreach (var card in aiHand)
+        {
+            if (!card.IsCardTactic())
+                hasInfantry = true;
+        }
+        
+        return !hasInfantry && handFull;
+    }
+
     private int GetLaneIndexThatMakesSense()
     {
         int laneIndex = 0;
@@ -895,10 +923,14 @@ public class DuelManager : MonoBehaviour
             {
                 if (card.GetCardStrength() > playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
                     returnCard = card;
+                else
+                    returnCard = card;
             }
             else
             {
                 if (card.GetCardStrength() < playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
+                    returnCard = card;
+                else
                     returnCard = card;
             }
         }

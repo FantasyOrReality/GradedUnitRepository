@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine.Events;
 
 public class BaseCard : MonoBehaviour
@@ -17,6 +16,7 @@ public class BaseCard : MonoBehaviour
     private int cardHealth;
     private int tempHealth;
     private int tempAttack;
+    private int laneIndex;
     
     private bool isCardSelected = false;
     private bool isCardReturningToPos = false;
@@ -228,7 +228,7 @@ public class BaseCard : MonoBehaviour
         targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
         
         SetIsPlayerCard(isPlayerCard);
-        
+
         if (cardEffect)
             GetCardEffect().SetIsThisPlayerCard(isPlayerCard);
     }
@@ -305,6 +305,11 @@ public class BaseCard : MonoBehaviour
         return isCardSetToAttack;
     }
 
+    public void SetLaneIndex(int index)
+    {
+        laneIndex = index;
+    }
+
     public BaseCardEffect GetCardEffect()
     {
         return cardEffect.GetComponent<BaseCardEffect>();
@@ -349,6 +354,7 @@ public class BaseCard : MonoBehaviour
 
         if (cardHealth == 0)
         {
+            DuelManager.GetInstance().FreeLane(laneIndex, isPlayerCard);
             DuelManager.GetInstance().OnCardDestroyed?.Invoke(this, isPlayerCard);
             Destroy(gameObject, 0.25f);
         }
