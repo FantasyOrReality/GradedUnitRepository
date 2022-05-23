@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,12 @@ public class DuncanEffect : BaseEarlEffect
     {
         DuelManager.GetInstance().OnCardHealthChanged.AddListener(OnCardHealthChanged);
         DuelManager.GetInstance().OnEarlHealthChanged.AddListener(OnEarlHealthChanged);
+    }
+
+    private void OnDisable()
+    {
+        DuelManager.GetInstance().OnCardHealthChanged.RemoveListener(OnCardHealthChanged);
+        DuelManager.GetInstance().OnEarlHealthChanged.RemoveListener(OnEarlHealthChanged);
     }
 
     public override void SpecialEffect()

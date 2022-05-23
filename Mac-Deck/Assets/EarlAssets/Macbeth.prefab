@@ -7,6 +7,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4834462494120634055, guid: 0bd05e79f021ffe43b9130084b86a24b, type: 3}
+      propertyPath: earlData
+      value: 
+      objectReference: {fileID: 11400000, guid: f25c07d97611a3e498808debcc2ae0a2, type: 2}
     - target: {fileID: 7632099450278227986, guid: 0bd05e79f021ffe43b9130084b86a24b, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -53,7 +57,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8458349836278949992, guid: 0bd05e79f021ffe43b9130084b86a24b, type: 3}
       propertyPath: m_Name
-      value: BaseEarl
+      value: Macbeth
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0bd05e79f021ffe43b9130084b86a24b, type: 3}

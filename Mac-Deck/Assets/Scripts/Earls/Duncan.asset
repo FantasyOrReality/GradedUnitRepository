@@ -16,6 +16,6 @@ MonoBehaviour:
   earlSuffix: The Kind
   earlHealth: 30
   earlDescription: Good man!
-  earlImage: {fileID: 21300000, guid: 895c5678167d95549bec63cadaf172cf, type: 3}
+  earlImage: {fileID: 21300000, guid: 12fe79b5379a0d141863708f16742cf6, type: 3}
   earlDeck: {fileID: 11400000, guid: 32dd4f034f05afe4296de5848a0388cb, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: b8057524ff95b094b9a2fb540b671b2d, type: 3}

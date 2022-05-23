@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,18 @@ public class PriestEffect : BaseCardEffect
         }
 
         DuelManager.GetInstance().OnCardSummoned.AddListener(OnCardSummoned);
+        DuelManager.GetInstance().OnTurnEnded.AddListener(OnTurnEnded);
+    }
+
+    private void OnDisable()
+    {
+        foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
+        {
+            card.OnCardSelected.RemoveListener(HealCard);
+        }
+        
+        DuelManager.GetInstance().OnCardSummoned.RemoveListener(OnCardSummoned);
+        DuelManager.GetInstance().OnTurnEnded.RemoveListener(OnTurnEnded);
     }
 
     private void Update()
@@ -47,6 +60,11 @@ public class PriestEffect : BaseCardEffect
         Image img = gameObject.GetComponentInChildren<Image>();
         if (img)
             img.raycastTarget = true;
+    }
+
+    private void OnTurnEnded(bool wasPlayerTurn)
+    {
+        ResetAfterTurn();
     }
     
     public override void SpecialEffect()

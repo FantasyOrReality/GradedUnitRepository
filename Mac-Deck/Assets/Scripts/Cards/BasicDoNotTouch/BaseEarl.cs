@@ -8,6 +8,9 @@ using UnityEngine.UI;
 public class BaseEarl : MonoBehaviour
 {
     [SerializeField] private EarlData earlData;
+    [SerializeField] private TextMeshProUGUI earlName;
+    [SerializeField] private TextMeshProUGUI earlHealth;
+
     private GameObject earlEffect;
     private bool isPlayerEarl = true;
 
@@ -19,13 +22,28 @@ public class BaseEarl : MonoBehaviour
         currHealth = earlData.earlHealth;
 
         GetComponentInChildren<Image>().sprite = earlData.earlImage;
-        GetComponentInChildren<TextMeshProUGUI>().text = GetEarlNameAndSuffix();
+        earlName.text = GetEarlNameAndSuffix();
 
         if (earlData.earlEffect != null)
         {
             earlEffect = Instantiate(earlData.earlEffect, transform);
-            earlEffect.GetComponent<BaseEarlEffect>().SetUp();
+            BaseEarlEffect eff = earlEffect.GetComponent<BaseEarlEffect>();
+            eff.SetUp();
+            eff.SetIsThisPlayerEarl(true);
         }
+
+        earlHealth.text = currHealth.ToString();
+    }
+
+    public void AISetUp()
+    {
+        Vector3 newPositionName = earlName.gameObject.transform.localPosition;
+        newPositionName.y = -1 * newPositionName.y;
+        isPlayerEarl = false;
+        earlName.gameObject.transform.localPosition = newPositionName;
+        
+        if (earlEffect)
+            earlEffect.GetComponent<BaseEarlEffect>().SetIsThisPlayerEarl(false);
     }
 
     /// <summary>
@@ -38,6 +56,7 @@ public class BaseEarl : MonoBehaviour
         int previousHealth = currHealth;
         currHealth = Mathf.Clamp(currHealth + delta, 0, 100);
 
+        earlHealth.text = currHealth.ToString();
         DuelManager.GetInstance().OnEarlHealthChanged?.Invoke(this, currHealth, isPlayerEarl);
         return currHealth != previousHealth;
     }

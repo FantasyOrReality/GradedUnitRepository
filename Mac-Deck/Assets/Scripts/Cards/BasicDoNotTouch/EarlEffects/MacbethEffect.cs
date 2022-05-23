@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +12,12 @@ public class MacbethEffect : BaseEarlEffect
     {
         DuelManager.GetInstance().OnCardDestroyed.AddListener(OnCardHealthChanged);
     }
-    
+
+    private void OnDisable()
+    {
+        DuelManager.GetInstance().OnCardDestroyed.RemoveListener(OnCardHealthChanged);
+    }
+
     public override void SpecialEffect()
     {
         List<BaseCard> cards = DuelManager.GetInstance().GetAllFriendlyCardsOnField();

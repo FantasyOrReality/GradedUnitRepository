@@ -38,6 +38,7 @@ public class BaseCard : MonoBehaviour
     [Space(10)] [Header("Some Card Stuff")] 
     [SerializeField] private Image cardImage;
     [SerializeField] public Image cardTemplate;
+    [SerializeField] public Image cardBack;
 
     [SerializeField] private TextMeshProUGUI strengthText;
     [SerializeField] private TextMeshProUGUI healthText;
@@ -51,13 +52,14 @@ public class BaseCard : MonoBehaviour
     {
         GetComponentInChildren<Canvas>().worldCamera = Camera.main;
 
+        cardBack.enabled = false;
         cardImage.sprite = cardData.CardImage;
         strengthText.text = cardData.cardStrength.ToString();
         healthText.text = cardData.cardHealth.ToString();
         descriptionText.text = cardData.cardDescription;
         nameText.text = IsCardTacticOrSpecial() ? cardData.cardName : SNameGenerator.GetInstance().GetRandomName();
         typeText.text = CardTypeToString(cardData.cardType);
-        
+
         if (cardData.cardEffect && IsCardTactic())
         {
             cardEffect = Instantiate(cardData.cardEffect, transform);
@@ -107,6 +109,37 @@ public class BaseCard : MonoBehaviour
             mousePos.z = transform.position.z;
             gameObject.transform.position = mousePos;
         }
+    }
+
+    public void AISetUp()
+    {
+        cardImage.enabled = false;
+        strengthText.enabled = false;
+        healthText.enabled = false;
+        descriptionText.enabled = false;
+        nameText.enabled = false;
+        typeText.enabled = false;
+        cardTemplate.raycastTarget = false;
+        
+        BetterButton cardButton = GetComponentInChildren<BetterButton>();
+        cardButton.OnClickEvent.RemoveListener(SelectCard);
+        cardButton.OnReleasedEvent.RemoveListener(PlayCard);
+        cardButton.OnHoverEnter.RemoveListener(CardHoverEnter);
+        cardButton.OnHoverExit.RemoveListener(CardHoverExit);
+
+        cardBack.enabled = true;
+    }
+
+    public void AIPlayedCard()
+    {
+        cardImage.enabled = true;
+        strengthText.enabled = true;
+        healthText.enabled = true;
+        descriptionText.enabled = true;
+        nameText.enabled = true;
+        typeText.enabled = true;
+
+        cardBack.enabled = false;
     }
     
     /// <summary>
@@ -187,12 +220,17 @@ public class BaseCard : MonoBehaviour
     /// <summary>
     /// SetUp called from the DuelManager to make sure that we have correct positions for the card hover effect
     /// </summary>
-    public void SetUp()
+    public void SetUp(bool isPlayerCard = true)
     {
         targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + hoverYoffset, transform.position.z);
         hoverMaxYoffset = targetHoverCardLocation.y;
         hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
         targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
+        
+        SetIsPlayerCard(isPlayerCard);
+        
+        if (cardEffect)
+            GetCardEffect().SetIsThisPlayerCard(isPlayerCard);
     }
     
     // Basic Getters
@@ -209,6 +247,11 @@ public class BaseCard : MonoBehaviour
     private bool IsCardTacticOrSpecial()
     {
         return IsCardTactic() || IsCardSpecial();
+    }
+
+    public bool IsAtMaxHealth()
+    {
+        return cardHealth >= cardData.cardHealth;
     }
     
     public int GetCardHealth()
@@ -262,6 +305,11 @@ public class BaseCard : MonoBehaviour
         return isCardSetToAttack;
     }
 
+    public BaseCardEffect GetCardEffect()
+    {
+        return cardEffect.GetComponent<BaseCardEffect>();
+    }
+
     /// <summary>
     /// Flips the Health and Attack stats of the card
     /// </summary>
@@ -280,7 +328,6 @@ public class BaseCard : MonoBehaviour
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
     public bool ApplyHealthChange(int delta, bool onlyThisTurn = true, bool fromTempEffect = false)
     {
-        // @TODO: Figure out why do temporary buffs not work
         int previousHealth = cardHealth;
         cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
         string newHealth = cardHealth.ToString();
@@ -294,7 +341,7 @@ public class BaseCard : MonoBehaviour
 
         if (cardHealth != previousHealth && onlyThisTurn)
         {
-            tempHealth =+ delta;
+            tempHealth += delta;
         }
     
         if (!fromTempEffect)
@@ -322,7 +369,7 @@ public class BaseCard : MonoBehaviour
         
         if (cardHealth != previousStrength && onlyThisTurn)
         {
-            tempAttack =+ delta;
+            tempAttack += delta;
         }
         
         if (cardStrength > cardData.cardStrength)

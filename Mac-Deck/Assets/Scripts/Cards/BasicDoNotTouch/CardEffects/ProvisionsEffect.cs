@@ -6,11 +6,21 @@ public class ProvisionsEffect : BaseCardEffect
     
     public override void SpecialEffect()
     {
-        foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
+        if (isThisPlayerCard)
         {
-            card.ApplyAttackChange(attackToAdd);
+            foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
+            {
+                card.ApplyAttackChange(attackToAdd);
+            }
         }
-        
+        else
+        {
+            foreach (var card in DuelManager.GetInstance().GetAllAICardsOnField())
+            {
+                card.ApplyHealthChange(attackToAdd);
+            }
+        }
+
         Destroy(gameObject.transform.parent.gameObject);
     }
 }

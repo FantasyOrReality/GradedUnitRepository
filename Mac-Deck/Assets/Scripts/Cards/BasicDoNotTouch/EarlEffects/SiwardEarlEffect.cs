@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,11 @@ public class SiwardEarlEffect : BaseEarlEffect
     public override void SetUp()
     {
         DuelManager.GetInstance().OnCardSummoned.AddListener(OnCardSummon);
+    }
+
+    private void OnDisable()
+    {
+        DuelManager.GetInstance().OnCardSummoned.RemoveListener(OnCardSummon);
     }
 
     public override void SpecialEffect()

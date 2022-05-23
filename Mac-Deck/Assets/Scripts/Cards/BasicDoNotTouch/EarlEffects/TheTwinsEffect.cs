@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,11 @@ public class TheTwinsEffect : BaseEarlEffect
     public override void SetUp()
     {
         DuelManager.GetInstance().OnCardSummoned.AddListener(OnCardSummoned);
+    }
+
+    private void OnDisable()
+    {
+        DuelManager.GetInstance().OnCardSummoned.RemoveListener(OnCardSummoned);
     }
 
     public override void SpecialEffect()
