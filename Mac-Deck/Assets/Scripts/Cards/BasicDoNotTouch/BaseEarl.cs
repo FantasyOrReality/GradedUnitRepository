@@ -51,13 +51,16 @@ public class BaseEarl : MonoBehaviour
     /// </summary>
     /// <param name="delta">The change in health to the Earl, positive numbers heal, negative do damage</param>
     /// <returns>Boolean, if health change has been applied</returns>
-    public bool ApplyHealthChange(int delta)
+    public bool ApplyHealthChange(int delta, bool instigate = true)
     {
         int previousHealth = currHealth;
         currHealth = Mathf.Clamp(currHealth + delta, 0, 100);
 
         earlHealth.text = currHealth.ToString();
-        DuelManager.GetInstance().OnEarlHealthChanged?.Invoke(this, currHealth, isPlayerEarl);
+        
+        if (instigate)
+            DuelManager.GetInstance().OnEarlHealthChanged?.Invoke(this, currHealth - previousHealth, isPlayerEarl);
+        
         return currHealth != previousHealth;
     }
 

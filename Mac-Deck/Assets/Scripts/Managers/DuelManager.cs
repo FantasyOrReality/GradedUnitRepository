@@ -742,7 +742,6 @@ public class DuelManager : MonoBehaviour
         if (aiHand.Count < 6)
         {
             BaseCard card = Instantiate(aiCardsInDeck[0], aiCardSpawn.position, aiCardSpawn.rotation);
-            card.AISetUp();
             Vector3 initialPos = card.transform.position;
             Vector3 target = GetFirstUnoccupiedTargetTransform(false);
             float delta = 0;
@@ -756,6 +755,7 @@ public class DuelManager : MonoBehaviour
             
             card.transform.position = target;
             card.SetUp(false);
+            card.AISetUp();
             aiHand.Add(card);
             aiCardsInDeck.RemoveAt(0);
 
@@ -775,8 +775,7 @@ public class DuelManager : MonoBehaviour
     {
         bool hasUnitsInHand = DoesAIHaveUnitsInHand();
         bool hasTacticInHand = DoesAIHaveTacticCardsInHand();
-        bool playedTacticThisTurn = false;
-        
+
         if (hasUnitsInHand && numUnitsSummoned < maxUnitsSummonedPerTurn)
         {
             int laneIndex = GetLaneIndexThatMakesSense();
@@ -792,6 +791,7 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.GetComponentInChildren<Canvas>().sortingOrder = 1;
                 cardToPlay.SetLaneIndex(laneIndex);
                 AISortOutHand(cardToPlay);
+                cardToPlay.GetCardEffect().SetIsThisPlayerCard(false);
                 aiDuelLanes[laneIndex].occupied = true;
                 aiDuelLanes[laneIndex].cardInLane = cardToPlay;
                 numUnitsSummoned++;
@@ -812,11 +812,16 @@ public class DuelManager : MonoBehaviour
             {
                 foreach (var card in aiHand)
                 {
-                    if (card.IsCardTactic() && !playedTacticThisTurn)
+                    if (card.IsCardTactic())
                     {
-                        card.GetCardEffect().SpecialEffect();
+                        BaseCardEffect ce = card.GetCardEffect();
+                        ce.SetIsThisPlayerCard(false);
+                        ce.SpecialEffect();
                         AISortOutHand(card);
-                        playedTacticThisTurn = true;
+                        
+                        yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
+                        HealCardIfPlayingDuncan();
+                        StartCoroutine(EvaluateForCombat());
                         yield break;
                     }
                 }
@@ -830,13 +835,19 @@ public class DuelManager : MonoBehaviour
             Debug.Log("Has tactic in hand!");
             foreach (var card in aiHand)
             {
-                if (card.IsCardTactic() && !playedTacticThisTurn)
+                if (card.IsCardTactic())
                 {
                     if (ShouldAIPlayTacticCard(card))
                     {
-                        card.GetCardEffect().SpecialEffect();
+                        BaseCardEffect ce = card.GetCardEffect();
+                        ce.SetIsThisPlayerCard(false);
+                        ce.SpecialEffect();
                         AISortOutHand(card);
-                        playedTacticThisTurn = true;
+
+                        yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
+                        HealCardIfPlayingDuncan();
+                        StartCoroutine(EvaluateForCombat());
+                        yield break;
                     }
                 }
             }

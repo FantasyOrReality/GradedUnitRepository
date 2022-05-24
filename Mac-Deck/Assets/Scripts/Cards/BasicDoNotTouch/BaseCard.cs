@@ -120,6 +120,10 @@ public class BaseCard : MonoBehaviour
         nameText.enabled = false;
         typeText.enabled = false;
         cardTemplate.raycastTarget = false;
+
+        isPlayerCard = false;
+        if (cardEffect)
+            GetCardEffect().SetIsThisPlayerCard(false);
         
         BetterButton cardButton = GetComponentInChildren<BetterButton>();
         cardButton.OnClickEvent.RemoveListener(SelectCard);
@@ -220,17 +224,17 @@ public class BaseCard : MonoBehaviour
     /// <summary>
     /// SetUp called from the DuelManager to make sure that we have correct positions for the card hover effect
     /// </summary>
-    public void SetUp(bool isPlayerCard = true)
+    public void SetUp(bool isPlayerCardIn = true)
     {
         targetHoverCardLocation = new Vector3(transform.position.x, transform.position.y + hoverYoffset, transform.position.z);
         hoverMaxYoffset = targetHoverCardLocation.y;
         hoverMinYoffset = targetHoverCardLocation.y - hoverYoffset;
         targetHoverCardScale = new Vector3(1.5f, 1.5f, 1.5f);
         
-        SetIsPlayerCard(isPlayerCard);
+        SetIsPlayerCard(isPlayerCardIn);
 
         if (cardEffect)
-            GetCardEffect().SetIsThisPlayerCard(isPlayerCard);
+            GetCardEffect().SetIsThisPlayerCard(isPlayerCardIn);
     }
     
     // Basic Getters
@@ -344,7 +348,7 @@ public class BaseCard : MonoBehaviour
         
         healthText.text = newHealth;
 
-        if (cardHealth != previousHealth && onlyThisTurn)
+        if (cardHealth != previousHealth && onlyThisTurn && cardName != "Macbeth The Brave")
         {
             tempHealth += delta;
         }
@@ -388,10 +392,10 @@ public class BaseCard : MonoBehaviour
 
     private void OnTurnEnded(bool wasPlayerTurn)
     {
-        if (tempHealth != 0)
+        if (tempHealth != 0 && cardHealth - tempHealth > 0)
             ApplyHealthChange(-tempHealth, false, true);
         
-        if (tempAttack != 0)
+        if (tempAttack != 0 && cardStrength - tempAttack > 0)
             ApplyAttackChange(-tempAttack, false);
 
         tempHealth = 0;

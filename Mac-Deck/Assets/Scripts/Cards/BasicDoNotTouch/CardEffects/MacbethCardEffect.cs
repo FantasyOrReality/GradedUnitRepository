@@ -9,7 +9,8 @@ public class MacbethCardEffect : BaseCardEffect
         owningEarl = manager.GetPlayerEarl();
         manager.OnEarlHealthChanged.AddListener(OnEarlHealthChanged);
         manager.OnCardHealthChanged.AddListener(OnCardHealthChanged);
-        owningCard.ApplyHealthChange(DuelManager.GetInstance().GetPlayerEarl().GetHealth());
+        
+        owningCard.ApplyHealthChange(DuelManager.GetInstance().GetPlayerEarl().GetHealth(), false, true);
     }
 
     private void OnDisable()
@@ -23,15 +24,15 @@ public class MacbethCardEffect : BaseCardEffect
     {
         if (isPlayer == isThisPlayerCard)
         {
-            owningCard.ApplyHealthChange(delta);
+            owningCard.ApplyHealthChange(delta, false, true);
         }
     }
 
-    private void OnCardHealthChanged(BaseCard card, int delta, bool isPlayerCard)
+    public void OnCardHealthChanged(BaseCard card, int delta, bool isPlayerCard)
     {
         if (card == owningCard)
         {
-            owningEarl.ApplyHealthChange(delta);
+            owningEarl.ApplyHealthChange(delta, false);
         }
     }
 }
