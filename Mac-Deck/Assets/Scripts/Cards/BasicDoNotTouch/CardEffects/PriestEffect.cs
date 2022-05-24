@@ -44,7 +44,7 @@ public class PriestEffect : BaseCardEffect
             card.OnCardSelected.AddListener(HealCard);
     }
 
-    private void HealCard(BaseCard cardToHeal)
+    public void HealCard(BaseCard cardToHeal)
     {
         if (!selectingCard || usedThisTurn) return;
         

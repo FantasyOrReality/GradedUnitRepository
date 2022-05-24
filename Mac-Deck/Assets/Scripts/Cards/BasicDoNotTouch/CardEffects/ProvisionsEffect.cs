@@ -10,14 +10,14 @@ public class ProvisionsEffect : BaseCardEffect
         {
             foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
             {
-                card.ApplyAttackChange(attackToAdd);
+                card.ApplyAttackChange(attackToAdd, true);
             }
         }
         else
         {
             foreach (var card in DuelManager.GetInstance().GetAllAICardsOnField())
             {
-                card.ApplyHealthChange(attackToAdd);
+                card.ApplyAttackChange(attackToAdd, true);
             }
         }
 

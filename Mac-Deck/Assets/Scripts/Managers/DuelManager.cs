@@ -88,7 +88,7 @@ public class DuelManager : MonoBehaviour
     [Header("AI Targets")]
     [SerializeField] private List<DuelLanes> aiDuelLanes = new List<DuelLanes>(4);
     [SerializeField] private List<CardTarget> aiCardTargets = new List<CardTarget>(6);
-    private List<BaseCard> aiHand = new List<BaseCard>(6);
+    [SerializeField] private List<BaseCard> aiHand = new List<BaseCard>(6);
 
 
     [Space(10)]
@@ -119,6 +119,9 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private int aiSmartMoveChance = 70;
 
     [SerializeField] private GameObject startButton;
+    [SerializeField] private Button battleButton;
+    [SerializeField] private Button endTurnButton;
+    
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
     private List<BaseCard> aiCardsInDeck = new List<BaseCard>(25);
@@ -178,6 +181,8 @@ public class DuelManager : MonoBehaviour
         // Set up the User Interface
         remainingCardsText.text = cardsInDeck.Count.ToString();
         remainingCardsTextAI.text = aiCardsInDeck.Count.ToString();
+        battleButton.interactable = false;
+        endTurnButton.interactable = false;
         
         OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
     }
@@ -281,6 +286,8 @@ public class DuelManager : MonoBehaviour
     public void StartDuel()
     {
         startButton.SetActive(false);
+        battleButton.interactable = true;
+        endTurnButton.interactable = true;
         DrawCardFromDeck(5);
         StartCoroutine(AIDrawCard(5, false));
     }
@@ -299,6 +306,7 @@ public class DuelManager : MonoBehaviour
         if (cardToPlay.IsCardTactic())
         {
             if (numTacticCardsPlayed >= maxTacticCardsPlayedPerTurn) return false;
+            
             if (cardToPlay.transform.position.x > tacticUpperLimit.position.x &&
                 cardToPlay.transform.position.y < tacticUpperLimit.position.y &&
                 cardToPlay.transform.position.x < tacticLowerLimit.position.x &&
@@ -315,6 +323,7 @@ public class DuelManager : MonoBehaviour
         else
         {
             if (numUnitsSummoned >= maxUnitsSummonedPerTurn) return false;
+            
             for (int i = 0; i < playerDuelLanes.Count; i++)
             {
                 if (cardToPlay.transform.position.x > playerDuelLanes[i].upperLimit.position.x &&
@@ -519,16 +528,12 @@ public class DuelManager : MonoBehaviour
             SwitchToCombatState();
         }
         
-        if (!aiEndingTurn)
+        if (!aiEndingTurn && duelPhase != DuelPhase.AIPhase)
         {
-            ChangeDuelPhase(DuelPhase.AIPhase);
             StartCoroutine(LerpCardAttacks(playerDuelLanes, aiDuelLanes, 0, aiEndingTurn));
         }
-        else if (aiEndingTurn)
+        else
         {
-            DrawCardFromDeck();
-            numUnitsSummoned = 0;
-            numTacticCardsPlayed = 0;
             StartCoroutine(LerpCardAttacks(aiDuelLanes, playerDuelLanes, 0, aiEndingTurn));
         }
     }
@@ -547,7 +552,30 @@ public class DuelManager : MonoBehaviour
         {
             if (index + 1 < playerDuelLanes.Count)
                 StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
-            
+
+            if (index == playerDuelLanes.Count - 1)
+            {
+                OnTurnEnded?.Invoke(!aiEndingTurn);
+
+                if (!aiEndingTurn)
+                {
+                    ChangeDuelPhase(DuelPhase.AIPhase);
+                    battleButton.interactable = false;
+                    endTurnButton.interactable = false;
+                    numUnitsSummoned = 0;
+                    numTacticCardsPlayed = 0;
+                    StartCoroutine(AIStartTurn());
+                }
+                else
+                {
+                    DrawCardFromDeck();
+                    battleButton.interactable = true;
+                    endTurnButton.interactable = true;
+                    numUnitsSummoned = 0;
+                    numTacticCardsPlayed = 0;
+                }
+            }
+
             yield break;
         }
         
@@ -595,14 +623,30 @@ public class DuelManager : MonoBehaviour
         
         if (index + 1 < playerDuelLanes.Count)
             StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
-        
-        OnTurnEnded?.Invoke(!aiEndingTurn);
-        
-        if (!aiEndingTurn)
+
+        if (index == playerDuelLanes.Count - 1)
         {
-            StartCoroutine(AIStartTurn());
+            OnTurnEnded?.Invoke(!aiEndingTurn);
+
+            if (!aiEndingTurn)
+            {
+                ChangeDuelPhase(DuelPhase.AIPhase);
+                battleButton.interactable = false;
+                endTurnButton.interactable = false;
+                numUnitsSummoned = 0;
+                numTacticCardsPlayed = 0;
+                StartCoroutine(AIStartTurn());
+            }
+            else
+            {
+                DrawCardFromDeck();
+                battleButton.interactable = true;
+                endTurnButton.interactable = true;
+                numUnitsSummoned = 0;
+                numTacticCardsPlayed = 0;
+            }
         }
-        
+
         yield return null;
     }
     
@@ -614,8 +658,17 @@ public class DuelManager : MonoBehaviour
     /// <returns>null</returns>
     IEnumerator DrawAndLerpCardFromDeckToLocation(Vector3 target, int quantity = 1)
     {
-        if (cardsInDeck.Count == 0) yield break;
-        if (playerHand.Count >= 6) yield break;
+        if (cardsInDeck.Count == 0)
+        {
+            LoseDuel();
+            yield break;
+        }
+
+        if (playerHand.Count >= 6)
+        {
+            ChangeDuelPhase(DuelPhase.MainPhase);
+            yield break;
+        }
 
         isDrawing = true;
         BaseCard card = Instantiate(cardsInDeck[0], cardSpawn.position, cardSpawn.rotation);
@@ -712,7 +765,7 @@ public class DuelManager : MonoBehaviour
             yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
         }
 
-        if (quantity <= 1 && shouldPlayTurn)
+        if (quantity == 1 && shouldPlayTurn)
             StartCoroutine(AIPlayCard());
         
         yield return null;
@@ -728,6 +781,8 @@ public class DuelManager : MonoBehaviour
         {
             int laneIndex = GetLaneIndexThatMakesSense();
             BaseCard cardToPlay = GetInfantryCardToPlay(laneIndex);
+            Debug.Log("CardToPlay: " + cardToPlay);
+            Debug.Log("LaneIndex: " + laneIndex);
 
             if (cardToPlay != null && !aiDuelLanes[laneIndex].occupied && numUnitsSummoned < maxUnitsSummonedPerTurn)
             {
@@ -748,20 +803,21 @@ public class DuelManager : MonoBehaviour
                     yield return null;
                 }
             }
-
-            if (numUnitsSummoned < maxUnitsSummonedPerTurn)
+        }
+        
+        // Play random Tactic card if AI hand is full and no Infantry
+        if (numUnitsSummoned < maxUnitsSummonedPerTurn)
+        {
+            if (IsHandFullWithNoInfantry())
             {
-                if (IsHandFullWithNoInfantry())
+                foreach (var card in aiHand)
                 {
-                    foreach (var card in aiHand)
+                    if (card.IsCardTactic() && !playedTacticThisTurn)
                     {
-                        if (card.IsCardTactic() && !playedTacticThisTurn)
-                        {
-                            card.GetCardEffect().SpecialEffect();
-                            AISortOutHand(card);
-                            playedTacticThisTurn = true;
-                            yield break;
-                        }
+                        card.GetCardEffect().SpecialEffect();
+                        AISortOutHand(card);
+                        playedTacticThisTurn = true;
+                        yield break;
                     }
                 }
             }
@@ -771,6 +827,7 @@ public class DuelManager : MonoBehaviour
         
         if (hasTacticInHand)
         {
+            Debug.Log("Has tactic in hand!");
             foreach (var card in aiHand)
             {
                 if (card.IsCardTactic() && !playedTacticThisTurn)
@@ -786,6 +843,7 @@ public class DuelManager : MonoBehaviour
         }
         
         yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
+        HealCardIfPlayingDuncan();
         StartCoroutine(EvaluateForCombat());
         
         yield return null;
@@ -812,8 +870,33 @@ public class DuelManager : MonoBehaviour
             }
         }
         
-        yield return null;
         EndTurn(true);
+        yield return null;
+    }
+
+    private void HealCardIfPlayingDuncan()
+    {
+        if (AIEarl.GetEarlName() == "Duncan")
+        {
+            foreach (var duelLane in aiDuelLanes)
+            {
+                if (duelLane.cardInLane.IsCardSpecial())
+                {
+                    PriestEffect pe = (PriestEffect)duelLane.cardInLane.GetCardEffect();
+                    if (pe)
+                    {
+                        foreach (var card in GetAllAICardsOnField())
+                        {
+                            if (!card.IsAtMaxHealth())
+                            {
+                                pe.HealCard(card);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     private bool DoesAIHaveUnitsInHand()
@@ -939,14 +1022,14 @@ public class DuelManager : MonoBehaviour
             {
                 if (card.GetCardStrength() > playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
                     returnCard = card;
-                else
+                else if (!card.IsCardTactic())
                     returnCard = card;
             }
             else
             {
                 if (card.GetCardStrength() < playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
                     returnCard = card;
-                else
+                else if (!card.IsCardTactic())
                     returnCard = card;
             }
         }

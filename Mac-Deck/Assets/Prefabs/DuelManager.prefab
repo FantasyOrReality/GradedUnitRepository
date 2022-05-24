@@ -2082,7 +2082,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: DrawCard/Start
+  m_Text: Start Duel
 --- !u!1 &4196449163626304848
 GameObject:
   m_ObjectHideFlags: 0
@@ -2463,8 +2463,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5596384390540053290}
         m_TargetAssemblyTypeName: DuelManager, Assembly-CSharp
-        m_MethodName: DrawCardFromDeck
-        m_Mode: 3
+        m_MethodName: StartDuel
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2713,6 +2713,7 @@ MonoBehaviour:
     occupied: 0
   - target: {fileID: 116820136}
     occupied: 0
+  aiHand: []
   tacticUpperLimit: {fileID: 450280285}
   tacticLowerLimit: {fileID: 1395802993}
   cardSpawn: {fileID: 1721547688}
@@ -2721,12 +2722,14 @@ MonoBehaviour:
   aiCardSpawn: {fileID: 591677951}
   remainingCardsText: {fileID: 4196449163639025317}
   remainingCardsTextAI: {fileID: 8457721594416497167}
-  selectedPlayerEarl: {fileID: 4834462494120634055, guid: 0bd05e79f021ffe43b9130084b86a24b, type: 3}
-  AIEarl: {fileID: 4834462494120634055, guid: 9dd3df92a1fbce548a7ccf0def029c8d, type: 3}
+  selectedPlayerEarl: {fileID: 3155908756827088431, guid: b649a26645d9859418e8ae28fa847145, type: 3}
+  AIEarl: {fileID: 3155908756827088431, guid: ed52a2aca46c0984b83da73fdff9292b, type: 3}
   maxUnitsSummonedPerTurn: 1
   maxTacticCardsPlayedPerTurn: 1
   aiSmartMoveChance: 70
-  startButton: {fileID: 0}
+  startButton: {fileID: 4196449163819936223}
+  battleButton: {fileID: 211234244}
+  endTurnButton: {fileID: 1784055310}
 --- !u!1 &7543649628650899827
 GameObject:
   m_ObjectHideFlags: 0

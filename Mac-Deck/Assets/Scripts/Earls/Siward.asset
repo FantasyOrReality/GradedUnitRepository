@@ -17,5 +17,5 @@ MonoBehaviour:
   earlHealth: 20
   earlDescription: Sneaky man!
   earlImage: {fileID: 21300000, guid: 4b65d6a691af77a42a832ed7dadae4c5, type: 3}
-  earlDeck: {fileID: 11400000, guid: fdfec61006c8e514691859c7693647b6, type: 2}
+  earlDeck: {fileID: 11400000, guid: 3e9e0e9f92bec4f46bc6da1f6701461d, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: dce9fac5fdf678848accbe09ad6df129, type: 3}

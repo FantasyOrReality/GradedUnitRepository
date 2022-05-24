@@ -10,14 +10,14 @@ public class MedicalEffect : BaseCardEffect
         {
             foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
             {
-                card.ApplyHealthChange(amountToHeal);
+                card.ApplyHealthChange(amountToHeal, true);
             }
         }
         else
         {
             foreach (var card in DuelManager.GetInstance().GetAllAICardsOnField())
             {
-                card.ApplyHealthChange(amountToHeal);
+                card.ApplyHealthChange(amountToHeal, true);
             }
         }
 

@@ -240,38 +240,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4196449163137113861, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: m_Text
-      value: Start Duel
-      objectReference: {fileID: 0}
-    - target: {fileID: 4196449163819936217, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4196449163819936217, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StartDuel
-      objectReference: {fileID: 0}
-    - target: {fileID: 5596384390540053290, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: AIEarl
-      value: 
-      objectReference: {fileID: 3155908756827088431, guid: ee4ac543df1a25d4f8756003625cdc8d, type: 3}
-    - target: {fileID: 5596384390540053290, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: startButton
-      value: 
-      objectReference: {fileID: 4196449163819936223}
-    - target: {fileID: 5596384390540053290, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-      propertyPath: selectedPlayerEarl
-      value: 
-      objectReference: {fileID: 3155908756827088431, guid: b649a26645d9859418e8ae28fa847145, type: 3}
     - target: {fileID: 6630806039867828982, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
       propertyPath: m_Name
       value: DuelManager
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
---- !u!1 &4196449163819936223 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4196449163819936223, guid: 58d1859f344ed084990cf37c9d8a59af, type: 3}
-  m_PrefabInstance: {fileID: 1305568660}
-  m_PrefabAsset: {fileID: 0}

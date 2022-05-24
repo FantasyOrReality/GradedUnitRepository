@@ -331,7 +331,7 @@ public class BaseCard : MonoBehaviour
     /// <param name="fromTempEffect">Was this function called to remove the temporary effects</param>
     /// <returns>Boolean, if health change has been applied</returns>
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
-    public bool ApplyHealthChange(int delta, bool onlyThisTurn = true, bool fromTempEffect = false)
+    public bool ApplyHealthChange(int delta, bool onlyThisTurn = false, bool fromTempEffect = false)
     {
         int previousHealth = cardHealth;
         cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
@@ -366,7 +366,7 @@ public class BaseCard : MonoBehaviour
     /// </summary>
     /// <param name="delta">Can be a number, positive numbers increase attack, negative decrease it.</param>
     /// <param name="onlyThisTurn">Should the effect only last this turn</param>
-    public void ApplyAttackChange(int delta, bool onlyThisTurn = true)
+    public void ApplyAttackChange(int delta, bool onlyThisTurn = false)
     {
         int previousStrength = cardStrength;
         cardStrength += delta;
@@ -388,8 +388,14 @@ public class BaseCard : MonoBehaviour
 
     private void OnTurnEnded(bool wasPlayerTurn)
     {
-        ApplyHealthChange(-tempHealth, false, true);
-        ApplyAttackChange(-tempAttack, false);
+        if (tempHealth != 0)
+            ApplyHealthChange(-tempHealth, false, true);
+        
+        if (tempAttack != 0)
+            ApplyAttackChange(-tempAttack, false);
+
+        tempHealth = 0;
+        tempAttack = 0;
     }
 
     /// <summary>
