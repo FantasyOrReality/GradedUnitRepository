@@ -20,11 +20,26 @@ public class MacbethEffect : BaseEarlEffect
 
     public override void SpecialEffect()
     {
-        List<BaseCard> cards = DuelManager.GetInstance().GetAllFriendlyCardsOnField();
+        if (audioSource)
+            audioSource.Play();
 
-        foreach (var card in cards)
+        if (isThisPlayerEarl)
         {
-            card.ApplyAttackChange(attackToAdd);
+            List<BaseCard> cards = DuelManager.GetInstance().GetAllFriendlyCardsOnField();
+
+            foreach (var card in cards)
+            {
+                card.ApplyAttackChange(attackToAdd);
+            }
+        }
+        else
+        {
+            List<BaseCard> cards = DuelManager.GetInstance().GetAllAICardsOnField();
+
+            foreach (var card in cards)
+            {
+                card.ApplyAttackChange(attackToAdd);
+            }
         }
     }
 

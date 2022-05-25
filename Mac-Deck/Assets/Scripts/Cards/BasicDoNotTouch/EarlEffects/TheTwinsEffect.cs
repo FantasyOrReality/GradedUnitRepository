@@ -20,17 +20,38 @@ public class TheTwinsEffect : BaseEarlEffect
 
     public override void SpecialEffect()
     {
-        List<BaseCard> cards = DuelManager.GetInstance().GetAllFriendlyCardsOnFieldOfType(CardType.Special);
+        if (audioSource)
+            audioSource.Play();
 
-        foreach (var card in cards)
+        if (isThisPlayerEarl)
         {
-            if (card.GetCardName() == "Double Trouble")
+            List<BaseCard> cards = DuelManager.GetInstance().GetAllFriendlyCardsOnFieldOfType(CardType.Special);
+
+            foreach (var card in cards)
             {
-                card.ApplyAttackChange(attackAndHealthToAdd);
-                card.ApplyHealthChange(attackAndHealthToAdd);
-                card.FlipStats();
+                if (card.GetCardName() == "Double Trouble")
+                {
+                    card.ApplyAttackChange(attackAndHealthToAdd);
+                    card.ApplyHealthChange(attackAndHealthToAdd);
+                    card.FlipStats();
+                }
             }
         }
+        else
+        {
+            List<BaseCard> cards = DuelManager.GetInstance().GetAllAICardsOnFieldOfType(CardType.Special);
+
+            foreach (var card in cards)
+            {
+                if (card.GetCardName() == "Double Trouble")
+                {
+                    card.ApplyAttackChange(attackAndHealthToAdd);
+                    card.ApplyHealthChange(attackAndHealthToAdd);
+                    card.FlipStats();
+                }
+            }
+        }
+        
     }
 
     private void OnCardSummoned(BaseCard card, bool isPlayerCard)

@@ -6,18 +6,20 @@ public class ProvisionsEffect : BaseCardEffect
     
     public override void SpecialEffect()
     {
+        if (audioSource)
+            audioSource.Play();
         if (isThisPlayerCard)
         {
             foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
             {
-                card.ApplyAttackChange(attackToAdd, true);
+                card.ApplyAttackChange(attackToAdd);
             }
         }
         else
         {
             foreach (var card in DuelManager.GetInstance().GetAllAICardsOnField())
             {
-                card.ApplyAttackChange(attackToAdd, true);
+                card.ApplyAttackChange(attackToAdd);
             }
         }
 

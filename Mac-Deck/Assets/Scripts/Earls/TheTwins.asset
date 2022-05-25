@@ -15,7 +15,7 @@ MonoBehaviour:
   earlName: Brusi and Siggurdson
   earlSuffix: The Twins
   earlHealth: 20
-  earlDescription: Sneaky man!
+  earlDescription: Twin boys
   earlImage: {fileID: 21300000, guid: 6892e80150c313b429b8e23b7cf458ef, type: 3}
-  earlDeck: {fileID: 11400000, guid: fdfec61006c8e514691859c7693647b6, type: 2}
+  earlDeck: {fileID: 11400000, guid: 32dd4f034f05afe4296de5848a0388cb, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: 54e7b16d36c229943b30eb1b58442d5a, type: 3}

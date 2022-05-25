@@ -14,8 +14,6 @@ public class BaseCard : MonoBehaviour
     private string cardName;
     private int cardStrength;
     private int cardHealth;
-    private int tempHealth;
-    private int tempAttack;
     private int laneIndex;
     
     private bool isCardSelected = false;
@@ -46,6 +44,8 @@ public class BaseCard : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI typeText;
     [SerializeField] private GameObject attackUI;
+    [SerializeField] private AudioSource soundWhenPlayed;
+    [SerializeField] private AudioSource cardHealed;
 
     // Basic Set up of the card, like adding images and text, saving variables and binding events for when it is clicked, hovered and so on
     private void Awake()
@@ -74,8 +74,6 @@ public class BaseCard : MonoBehaviour
         cardButton.OnReleasedEvent.AddListener(PlayCard);
         cardButton.OnHoverEnter.AddListener(CardHoverEnter);
         cardButton.OnHoverExit.AddListener(CardHoverExit);
-
-        DuelManager.GetInstance().OnTurnEnded.AddListener(OnTurnEnded);
     }
     
     /// <summary>
@@ -183,6 +181,7 @@ public class BaseCard : MonoBehaviour
         {
             // If the card has been played, disable it's raycast targeting, so that we can no longer select it
             cardPlayed = true;
+            soundWhenPlayed.Play();
             if (cardData.cardEffect && !IsCardTactic())
             {
                 cardEffect = Instantiate(cardData.cardEffect, transform);
@@ -316,7 +315,13 @@ public class BaseCard : MonoBehaviour
 
     public BaseCardEffect GetCardEffect()
     {
-        return cardEffect.GetComponent<BaseCardEffect>();
+        if (cardEffect)
+        {
+            var ce = cardEffect.GetComponent<BaseCardEffect>();
+            if (ce) return ce;
+        }
+        
+        return null;
     }
 
     /// <summary>
@@ -345,14 +350,12 @@ public class BaseCard : MonoBehaviour
         {
             newHealth = "<color=green>" + cardHealth + "ˆ</color>";
         }
-        
+
+        if (delta > 0)
+            cardHealed.Play();
+
         healthText.text = newHealth;
 
-        if (cardHealth != previousHealth && onlyThisTurn && cardName != "Macbeth The Brave")
-        {
-            tempHealth += delta;
-        }
-    
         if (!fromTempEffect)
             DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth, isPlayerCard);
 
@@ -376,11 +379,8 @@ public class BaseCard : MonoBehaviour
         cardStrength += delta;
         string newStrength = cardStrength.ToString();
 
-        
-        if (cardHealth != previousStrength && onlyThisTurn)
-        {
-            tempAttack += delta;
-        }
+        if (delta > 0)
+            cardHealed.Play();
         
         if (cardStrength > cardData.cardStrength)
         {
@@ -389,19 +389,7 @@ public class BaseCard : MonoBehaviour
         
         strengthText.text = newStrength;
     }
-
-    private void OnTurnEnded(bool wasPlayerTurn)
-    {
-        if (tempHealth != 0 && cardHealth - tempHealth > 0)
-            ApplyHealthChange(-tempHealth, false, true);
-        
-        if (tempAttack != 0 && cardStrength - tempAttack > 0)
-            ApplyAttackChange(-tempAttack, false);
-
-        tempHealth = 0;
-        tempAttack = 0;
-    }
-
+    
     /// <summary>
     /// Executes the special effect of the card
     /// </summary>

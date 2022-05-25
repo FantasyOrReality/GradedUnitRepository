@@ -6,6 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: c1388177e3c53c542a1996ad9a7cde71
+  - enabled: 1
     path: Assets/Scenes/DuelScene.unity
     guid: 27b5993d0b34c654392e353ad084f1f8
+  - enabled: 1
+    path: Assets/Scenes/Settings.unity
+    guid: f3c5f6c4a48c1604690d5458388dea99
+  - enabled: 1
+    path: Assets/Scenes/EarlSelection.unity
+    guid: 421c7bd5097c4db40b15c4db82a93417
+  - enabled: 1
+    path: Assets/Scenes/EarlInformation.unity
+    guid: 326be73fabf1dd9439e6399314944a91
   m_configObjects: {}

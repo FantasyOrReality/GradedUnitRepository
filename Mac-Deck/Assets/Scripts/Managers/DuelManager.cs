@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ public enum DuelPhase
     MainPhase,
     CombatPhase,
     AIPhase,
+    EndPhase,
     None
 }
 
@@ -118,9 +120,18 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private int maxTacticCardsPlayedPerTurn = 1;
     [SerializeField] private int aiSmartMoveChance = 70;
 
+    [Space(10)] 
+    [Header("Sounds")] 
+    [SerializeField] private AudioSource drawSound;
+    [SerializeField] private AudioSource combatSound;
+    [SerializeField] private AudioSource victorySound;
+    [SerializeField] private AudioSource defeatSound;
+
     [SerializeField] private GameObject startButton;
     [SerializeField] private Button battleButton;
     [SerializeField] private Button endTurnButton;
+    [SerializeField] public Button mainMenuButton;
+    [SerializeField] private TextMeshProUGUI winLoseText;
     
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
@@ -159,6 +170,11 @@ public class DuelManager : MonoBehaviour
         Instantiate(nameGen);
         rnd = new Random();
         
+        OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
+    }
+
+    public void Start()
+    {
         selectedPlayerEarl = Instantiate(selectedPlayerEarl, earlTarget.position, earlTarget.rotation);
         AIEarl = Instantiate(AIEarl, aiEarlTarget.position, aiEarlTarget.rotation);
         
@@ -183,8 +199,7 @@ public class DuelManager : MonoBehaviour
         remainingCardsTextAI.text = aiCardsInDeck.Count.ToString();
         battleButton.interactable = false;
         endTurnButton.interactable = false;
-        
-        OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
+
     }
 
     /// <summary>
@@ -286,7 +301,6 @@ public class DuelManager : MonoBehaviour
     public void StartDuel()
     {
         startButton.SetActive(false);
-        battleButton.interactable = true;
         endTurnButton.interactable = true;
         DrawCardFromDeck(5);
         StartCoroutine(AIDrawCard(5, false));
@@ -509,12 +523,24 @@ public class DuelManager : MonoBehaviour
 
     private void WinDuel()
     {
-        
+        victorySound.Play();
+        ChangeDuelPhase(DuelPhase.EndPhase);
+        StopAllCoroutines();
+        mainMenuButton.gameObject.SetActive(true);
+        endTurnButton.interactable = false;
+        battleButton.interactable = false;
+        winLoseText.text = "You won!";        
     }
 
     private void LoseDuel()
     {
-        
+        defeatSound.Play();
+        ChangeDuelPhase(DuelPhase.EndPhase);
+        StopAllCoroutines();
+        mainMenuButton.gameObject.SetActive(true);
+        endTurnButton.interactable = false;
+        battleButton.interactable = false;
+        winLoseText.text = "You lost!";
     }
     
     /// <summary>
@@ -585,6 +611,36 @@ public class DuelManager : MonoBehaviour
 
         if (dl1[index].cardInLane.GetIsCardSetToAttack())
         {
+            if (dl2[index].cardInLane && !dl2[index].cardInLane.CanCardBeAttacked())
+            {
+                if (index + 1 < playerDuelLanes.Count)
+                    StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
+                
+                if (index == playerDuelLanes.Count - 1 && duelPhase != DuelPhase.EndPhase)
+                {
+                    OnTurnEnded?.Invoke(!aiEndingTurn);
+
+                    if (!aiEndingTurn)
+                    {
+                        ChangeDuelPhase(DuelPhase.AIPhase);
+                        battleButton.interactable = false;
+                        endTurnButton.interactable = false;
+                        numUnitsSummoned = 0;
+                        numTacticCardsPlayed = 0;
+                        StartCoroutine(AIStartTurn());
+                    }
+                    else
+                    {
+                        DrawCardFromDeck();
+                        battleButton.interactable = true;
+                        endTurnButton.interactable = true;
+                        numUnitsSummoned = 0;
+                        numTacticCardsPlayed = 0;
+                    }
+                }
+                
+                yield break;
+            }
             Vector3 targetPos;
             if (dl2[index].occupied)
                 targetPos = dl2[index].cardInLane.transform.position;
@@ -602,29 +658,39 @@ public class DuelManager : MonoBehaviour
                 yield return null;
             }
 
+            combatSound.Play();
             if (dl2[index].occupied)
-                dl2[index].cardInLane.ApplyHealthChange(-card.GetCardStrength(), false);
+            {
+                int dmg = -dl2[index].cardInLane.GetCardStrength();
+                dl2[index].cardInLane.ApplyHealthChange(-card.GetCardStrength());
+                if (dl1[index].cardInLane)
+                    dl1[index].cardInLane.ApplyHealthChange(dmg);
+            }
             else if (aiEndingTurn)
                 selectedPlayerEarl.ApplyHealthChange(-card.GetCardStrength());
             else
                 AIEarl.ApplyHealthChange(-card.GetCardStrength());
 
-            dl1[index].cardInLane.SetShouldCardAttack(false);
+            if (dl1[index].cardInLane)
+                dl1[index].cardInLane.SetShouldCardAttack(false);
 
-            while (delta > 0)
+            if (dl1[index].cardInLane && dl1[index].cardInLane.GetCardHealth() > 0)
             {
-                card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
-                delta -= Time.deltaTime * 3.0f;
-                yield return null;
+                while (delta > 0)
+                {
+                    card.transform.position = Vector3.Lerp(initialPos, targetPos, delta);
+                    delta -= Time.deltaTime * 3.0f;
+                    yield return null;
+                }
             }
-        
+
             card.transform.position = initialPos;
         }
         
         if (index + 1 < playerDuelLanes.Count)
             StartCoroutine(LerpCardAttacks(dl1, dl2, index + 1, aiEndingTurn));
 
-        if (index == playerDuelLanes.Count - 1)
+        if (index == playerDuelLanes.Count - 1 && duelPhase != DuelPhase.EndPhase)
         {
             OnTurnEnded?.Invoke(!aiEndingTurn);
 
@@ -670,6 +736,7 @@ public class DuelManager : MonoBehaviour
             yield break;
         }
 
+        drawSound.Play();
         isDrawing = true;
         BaseCard card = Instantiate(cardsInDeck[0], cardSpawn.position, cardSpawn.rotation);
         Vector3 initialPos = card.transform.position;
@@ -730,15 +797,22 @@ public class DuelManager : MonoBehaviour
         yield return null;
     }
 
+    public void ReturnToMainMenu()
+    {
+        GameManager.GetInstance().SwitchToMainMenuFromGame();
+    }
+
     #region AI
     IEnumerator AIStartTurn()
     {
+        if (duelPhase == DuelPhase.EndPhase) yield break;
         StartCoroutine(AIDrawCard());
         yield return null;
     }
 
     IEnumerator AIDrawCard(int quantity = 1, bool shouldPlayTurn = true)
     {
+        if (duelPhase == DuelPhase.EndPhase) yield break;
         if (aiHand.Count < 6)
         {
             BaseCard card = Instantiate(aiCardsInDeck[0], aiCardSpawn.position, aiCardSpawn.rotation);
@@ -773,6 +847,7 @@ public class DuelManager : MonoBehaviour
 
     IEnumerator AIPlayCard()
     {
+        if (duelPhase == DuelPhase.EndPhase) yield break;
         bool hasUnitsInHand = DoesAIHaveUnitsInHand();
         bool hasTacticInHand = DoesAIHaveTacticCardsInHand();
 
@@ -791,7 +866,9 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.GetComponentInChildren<Canvas>().sortingOrder = 1;
                 cardToPlay.SetLaneIndex(laneIndex);
                 AISortOutHand(cardToPlay);
-                cardToPlay.GetCardEffect().SetIsThisPlayerCard(false);
+                var ce = cardToPlay.GetCardEffect();
+                if (ce)
+                    ce.SetIsThisPlayerCard(false);
                 aiDuelLanes[laneIndex].occupied = true;
                 aiDuelLanes[laneIndex].cardInLane = cardToPlay;
                 numUnitsSummoned++;
@@ -862,6 +939,7 @@ public class DuelManager : MonoBehaviour
 
     IEnumerator EvaluateForCombat()
     {
+        if (duelPhase == DuelPhase.EndPhase) yield break;
         for (int i = 0; i < aiDuelLanes.Count; i++)
         {
             int errorInt = rnd.Next(0, 100);
@@ -891,20 +969,23 @@ public class DuelManager : MonoBehaviour
         {
             foreach (var duelLane in aiDuelLanes)
             {
-                if (duelLane.cardInLane.IsCardSpecial())
+                if (duelLane.occupied)
                 {
-                    PriestEffect pe = (PriestEffect)duelLane.cardInLane.GetCardEffect();
-                    if (pe)
+                    if (duelLane.cardInLane.IsCardSpecial())
                     {
-                        foreach (var card in GetAllAICardsOnField())
+                        PriestEffect pe = (PriestEffect)duelLane.cardInLane.GetCardEffect();
+                        if (pe)
                         {
-                            if (!card.IsAtMaxHealth())
+                            foreach (var card in GetAllAICardsOnField())
                             {
-                                pe.HealCard(card);
-                                return;
+                                if (!card.IsAtMaxHealth())
+                                {
+                                    pe.HealCard(card);
+                                    return;
+                                }
                             }
                         }
-                    }
+                    }  
                 }
             }
         }

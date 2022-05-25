@@ -4,6 +4,8 @@ public class BaseEarlEffect : MonoBehaviour, SpecialAbilityInterface
 {
     protected bool usedThisTurn = false;
     protected bool isThisPlayerEarl = true;
+
+    [SerializeField] protected AudioSource audioSource;
     
     public virtual void SetUp()
     {

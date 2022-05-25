@@ -33,6 +33,7 @@ public class BetterButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     {
         if (!button.interactable) return;
 
+        GetComponent<AudioSource>()?.Play();
         OnClickEvent?.Invoke();
         buttonPressed = true;
     }

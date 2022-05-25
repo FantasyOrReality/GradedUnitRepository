@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Audio;
+
 
 public class MedicalEffect : BaseCardEffect
 {
@@ -6,18 +8,21 @@ public class MedicalEffect : BaseCardEffect
     
     public override void SpecialEffect()
     {
+        if (audioSource)
+            audioSource.Play();
+
         if (isThisPlayerCard)
         {
             foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
             {
-                card.ApplyHealthChange(amountToHeal, true);
+                card.ApplyHealthChange(amountToHeal);
             }
         }
         else
         {
             foreach (var card in DuelManager.GetInstance().GetAllAICardsOnField())
             {
-                card.ApplyHealthChange(amountToHeal, true);
+                card.ApplyHealthChange(amountToHeal);
             }
         }
 

@@ -48,10 +48,13 @@ public class PriestEffect : BaseCardEffect
     {
         if (!selectingCard || usedThisTurn) return;
         
+        if (audioSource)
+            audioSource.Play();
+        
         cardToHeal.ApplyHealthChange(amountToHeal);
         selectingCard = false;
         usedThisTurn = true;
-        
+
         foreach (var card in DuelManager.GetInstance().GetAllFriendlyCardsOnField())
         {
             card.cardTemplate.raycastTarget = false;

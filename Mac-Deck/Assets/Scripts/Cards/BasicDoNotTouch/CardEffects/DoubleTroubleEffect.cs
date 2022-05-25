@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class DoubleTroubleEffect : BaseCardEffect
 {
     private void OnEnable()
@@ -14,6 +16,9 @@ public class DoubleTroubleEffect : BaseCardEffect
     {
         owningCard.ApplyHealthChange(1);
         owningCard.ApplyAttackChange(2);
+        
+        if (audioSource)
+            audioSource.Play();
     }
 
     private void OnCardSummon(BaseCard card, bool isPlayerCard)

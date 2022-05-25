@@ -18,5 +18,6 @@ MonoBehaviour:
   cardStrength: 0
   cardHealth: 0
   cardType: 2
-  CardImage: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  CardImage: {fileID: 21300000, guid: 035141d105ff49d428c2761ce1d390ff, type: 3}
   cardEffect: {fileID: 1322062209947195055, guid: 4c035bc1de33e8c49b5fba6659ce1156, type: 3}
+  autoExecuteEffect: 0

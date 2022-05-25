@@ -6,6 +6,8 @@ public class BaseCardEffect : MonoBehaviour, SpecialAbilityInterface
     protected bool isThisPlayerCard = true;
     protected BaseCard owningCard;
 
+    [SerializeField] protected AudioSource audioSource;
+
     public void SetOwningCard(BaseCard owning)
     {
         owningCard = owning;

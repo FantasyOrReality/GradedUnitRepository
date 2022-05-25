@@ -19,13 +19,30 @@ public class SiwardEarlEffect : BaseEarlEffect
 
     public override void SpecialEffect()
     {
-        List<BaseCard> cardsOnField = DuelManager.GetInstance().GetAllFriendlyCardsOnFieldOfType(CardType.Special);
-        foreach (var card in cardsOnField)
+        if (audioSource)
+            audioSource.Play();
+        if (isThisPlayerEarl)
         {
-            if (card.GetCardName() == "Master Assassin")
+            List<BaseCard> cardsOnField = DuelManager.GetInstance().GetAllFriendlyCardsOnFieldOfType(CardType.Special);
+            foreach (var card in cardsOnField)
             {
-                card.SetCanBeAttacked(false);
-                card.ApplyAttackChange(attackToAdd);
+                if (card.GetCardName() == "Master Assassin")
+                {
+                    card.SetCanBeAttacked(false);
+                    card.ApplyAttackChange(attackToAdd);
+                }
+            }
+        }
+        else
+        {   
+            List<BaseCard> cardsOnField = DuelManager.GetInstance().GetAllAICardsOnFieldOfType(CardType.Special);
+            foreach (var card in cardsOnField)
+            {
+                if (card.GetCardName() == "Master Assassin")
+                {
+                    card.SetCanBeAttacked(false);
+                    card.ApplyAttackChange(attackToAdd);
+                }
             }
         }
     }

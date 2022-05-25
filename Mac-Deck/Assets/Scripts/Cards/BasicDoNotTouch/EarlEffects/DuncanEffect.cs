@@ -21,11 +21,25 @@ public class DuncanEffect : BaseEarlEffect
 
     public override void SpecialEffect()
     {
-        List<BaseCard> friendlyCardsOnField = DuelManager.GetInstance().GetAllFriendlyCardsOnField();
-
-        foreach (var card in friendlyCardsOnField)
+        if (audioSource)
+            audioSource.Play();
+        if (isThisPlayerEarl)
         {
-            card.ApplyHealthChange(amountToHeal);
+            List<BaseCard> friendlyCardsOnField = DuelManager.GetInstance().GetAllFriendlyCardsOnField();
+        
+            foreach (var card in friendlyCardsOnField)
+            {
+                card.ApplyHealthChange(amountToHeal);
+            }
+        }
+        else
+        {
+            List<BaseCard> friendlyCardsOnField = DuelManager.GetInstance().GetAllAICardsOnField();
+        
+            foreach (var card in friendlyCardsOnField)
+            {
+                card.ApplyHealthChange(amountToHeal);
+            }
         }
     }
 
