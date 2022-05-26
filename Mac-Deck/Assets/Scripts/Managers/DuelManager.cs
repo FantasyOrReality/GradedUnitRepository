@@ -254,6 +254,15 @@ public class DuelManager : MonoBehaviour
         }
     }
 
+    private void EndTurnFreeLane()
+    {
+        for (int i = 0; i < playerDuelLanes.Count; i++)
+        {
+            if (!playerDuelLanes[i].cardInLane) playerDuelLanes[i].occupied = false;
+            if (!aiDuelLanes[i].cardInLane) aiDuelLanes[i].occupied = false;
+        }
+    }
+
     /// <summary>
     /// Fixes the position of the cards after you play one
     /// </summary>
@@ -380,8 +389,9 @@ public class DuelManager : MonoBehaviour
         
         for (int i = 0; i < playerDuelLanes.Count; i++)
         {
-            if (playerDuelLanes[i].cardInLane != null)
-                cardsOnField.Add(playerDuelLanes[i].cardInLane);
+            if (playerDuelLanes[i].occupied)
+                if (playerDuelLanes[i].cardInLane != null)
+                    cardsOnField.Add(playerDuelLanes[i].cardInLane);
         }
         
         return cardsOnField;
@@ -393,9 +403,10 @@ public class DuelManager : MonoBehaviour
 
         for (int i = 0; i < playerDuelLanes.Count; i++)
         {
-            if (playerDuelLanes[i].cardInLane.GetCardType() == cardType)
+            if (playerDuelLanes[i].occupied)
                 if (playerDuelLanes[i].cardInLane != null)
-                    cardsOnField.Add(playerDuelLanes[i].cardInLane);
+                    if (playerDuelLanes[i].cardInLane.GetCardType() == cardType)
+                        cardsOnField.Add(playerDuelLanes[i].cardInLane);
         }
         
         return cardsOnField;
@@ -407,8 +418,9 @@ public class DuelManager : MonoBehaviour
         
         for (int i = 0; i < aiDuelLanes.Count; i++)
         {
-            if (aiDuelLanes[i].cardInLane != null)
-                cardsOnField.Add(aiDuelLanes[i].cardInLane);
+            if (aiDuelLanes[i].occupied)
+                if (aiDuelLanes[i].cardInLane != null)
+                    cardsOnField.Add(aiDuelLanes[i].cardInLane);
         }
         
         return cardsOnField;
@@ -420,9 +432,10 @@ public class DuelManager : MonoBehaviour
 
         for (int i = 0; i < aiDuelLanes.Count; i++)
         {
-            if (aiDuelLanes[i].cardInLane.GetCardType() == cardType)
+            if (aiDuelLanes[i].occupied)
                 if (aiDuelLanes[i].cardInLane != null)
-                    cardsOnField.Add(aiDuelLanes[i].cardInLane);
+                    if (aiDuelLanes[i].cardInLane.GetCardType() == cardType)
+                        cardsOnField.Add(aiDuelLanes[i].cardInLane);
         }
         
         return cardsOnField;
@@ -553,6 +566,8 @@ public class DuelManager : MonoBehaviour
         {
             SwitchToCombatState();
         }
+
+        EndTurnFreeLane();
         
         if (!aiEndingTurn && duelPhase != DuelPhase.AIPhase)
         {
@@ -948,8 +963,15 @@ public class DuelManager : MonoBehaviour
             {
                 if (errorInt < aiSmartMoveChance && aiDuelLanes[i].cardInLane.GetCardName() != "The Priest")
                 {
-                    aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
-                    yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
+                    if (aiDuelLanes[i] != null)
+                    {
+                        aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
+                        yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
+                    }
+                    else
+                    {
+                        FreeLane(i, false);
+                    }
 
                 }
                 else
