@@ -15,7 +15,18 @@ MonoBehaviour:
   earlName: Macbeth
   earlSuffix: The Brave
   earlHealth: 25
-  earlDescription: MacBeth is a badass!
+  earlDescription: "Little is known about Macbeth's early life, although he was the
+    son of Findl\xE1ech of Moray and may have been a grandson of Malcolm II. He became
+    Mormaer of Moray \u2013 a semi-autonomous province \u2013 in 1032, and was probably
+    responsible for the death of the previous mormaer, Gille Coemg\xE1in. He subsequently
+    married Gille Coemg\xE1in's widow, Gruoch, but they had no children together.\r\n\r\nIn
+    1040, Duncan I launched an attack into Moray and was killed in action by Macbeth's
+    troops. Macbeth succeeded him as King of Alba, apparently with little opposition.
+    His 17-year reign was mostly peaceful, although in 1054 he was faced with an
+    English invasion, led by Siward, Earl of Northumbria, on behalf of Edward the
+    Confessor. Macbeth was killed at the Battle of Lumphanan in 1057 by forces loyal
+    to the future Malcolm III. He was buried on Iona, the traditional resting place
+    of Scottish kings. "
   earlImage: {fileID: 21300000, guid: 8d86b320a986d634a913945c6381df63, type: 3}
   earlDeck: {fileID: 11400000, guid: fdfec61006c8e514691859c7693647b6, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: c74dd651668cebf4fa6ded9202f8cdf1, type: 3}

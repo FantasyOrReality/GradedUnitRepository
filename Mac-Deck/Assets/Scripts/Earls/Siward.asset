@@ -15,7 +15,27 @@ MonoBehaviour:
   earlName: Siward
   earlSuffix: The Shadow
   earlHealth: 20
-  earlDescription: Sneaky man!
+  earlDescription: " It is possible Siward may have been of Scandinavian or Anglo-Scandinavian
+    origin, perhaps a relative of Earl Ulf, although this is speculative and unclear.
+    He emerged as a powerful regional strongman in England during the reign of Cnut
+    (\"Canute the Great\", 1016\u20131035). Cnut was a Scandinavian ruler who conquered
+    England in the 1010s, and Siward was one of the many Scandinavians who came to
+    England in the aftermath of that conquest. Siward subsequently rose to become
+    sub-ruler of most of northern England. From 1033 at the latest Siward was in
+    control of southern Northumbria, that is, present-day Yorkshire, governing as
+    earl on Cnut's behalf.\r\n\r\nHe entrenched his position in northern England
+    by marrying \xC6lffl\xE6d, the daughter of Ealdred, Earl of Bamburgh. After killing
+    Ealdred's successor Eadulf in 1041, Siward gained control of all Northumbria.
+    He exerted his power in support of Cnut's successors, kings Harthacnut and Edward,
+    assisting them with vital military aid and counsel. He probably gained control
+    of the middle shires of Northampton and Huntingdon by the 1050s, and there is
+    some evidence that he spread Northumbrian control into Cumberland. In the early
+    1050s Earl Siward turned against the Scottish king Mac Bethad mac Findla\xEDch
+    (\"Macbeth\"). Despite the death of his son Osbjorn, Siward defeated Mac Bethad
+    in battle in 1054. More than half a millennium later the adventure in Scotland
+    earned him a place in William Shakespeare's Macbeth. Siward died in 1055, leaving
+    one son, Waltheof, who would eventually succeed to Northumbria. St Olave's church
+    in York and nearby Heslington Hill are associated with Siward. "
   earlImage: {fileID: 21300000, guid: 4b65d6a691af77a42a832ed7dadae4c5, type: 3}
   earlDeck: {fileID: 11400000, guid: 3e9e0e9f92bec4f46bc6da1f6701461d, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: dce9fac5fdf678848accbe09ad6df129, type: 3}

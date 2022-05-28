@@ -17,7 +17,7 @@ public class EarlSelection : MonoBehaviour
         for (int i = 0; i < earls.Count; i++)
         {
             images[i].sprite = earls[i].earlImage;
-            names[i].text = earls[i].earlName + earls[i].earlSuffix;
+            names[i].text = earls[i].earlName + " " + earls[i].earlSuffix;
         }
     }
 

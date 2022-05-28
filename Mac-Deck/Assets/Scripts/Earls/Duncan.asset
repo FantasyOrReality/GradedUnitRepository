@@ -15,7 +15,20 @@ MonoBehaviour:
   earlName: Duncan
   earlSuffix: The Kind
   earlHealth: 30
-  earlDescription: Good man!
+  earlDescription: "The ancestry of King Duncan is not certain. In modern texts he
+    is the son of Cr\xEDn\xE1n, hereditary lay abbot of Dunkeld, and Beth\xF3c, daughter
+    of King Malcolm II. However, in the late 17th century the historian Frederic
+    Van Bossen, after collecting historical accounts throughout Europe, identified
+    King Duncan as the first son of Abonarhl ap crinan (the grandson of Crinan) and
+    Princess Beatrice, the eldest daughter to King Malcom, the 2nd, and Gunora who
+    was the daughter of the \"2nd Duke of Normandy\".\r\n\r\nUnlike the \"King Duncan\"
+    of Shakespeare's Macbeth, the historical Duncan appears to have been a young
+    man. He followed his grandfather Malcolm as king after the latter's death on
+    25 November 1034, without apparent opposition. He may have been Malcolm's acknowledged
+    successor or T\xE0naiste as the succession appears to have been uneventful. Earlier
+    histories, following John of Fordun, supposed that Duncan had been king of Strathclyde
+    in his grandfather's lifetime, between 1018 and 1034, ruling the former Kingdom
+    of Strathclyde as an appanage. Modern historians discount this idea."
   earlImage: {fileID: 21300000, guid: 12fe79b5379a0d141863708f16742cf6, type: 3}
   earlDeck: {fileID: 11400000, guid: 190df098e51965740b15f55743d8ad60, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: b8057524ff95b094b9a2fb540b671b2d, type: 3}

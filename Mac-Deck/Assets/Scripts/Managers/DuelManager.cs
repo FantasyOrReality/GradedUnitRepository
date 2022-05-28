@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -107,6 +108,11 @@ public class DuelManager : MonoBehaviour
     [Header("User Interface")]
     [SerializeField] private Text remainingCardsText;
     [SerializeField] private Text remainingCardsTextAI;
+    [SerializeField] private GameObject startButton;
+    [SerializeField] private Button battleButton;
+    [SerializeField] private Button endTurnButton;
+    [SerializeField] public Button mainMenuButton;
+    [SerializeField] private TextMeshProUGUI winLoseText;
     
     
     [Space(10)]
@@ -126,13 +132,8 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private AudioSource combatSound;
     [SerializeField] private AudioSource victorySound;
     [SerializeField] private AudioSource defeatSound;
+    [SerializeField] private StartOfDuelPlayer startOfDuelPlayer;
 
-    [SerializeField] private GameObject startButton;
-    [SerializeField] private Button battleButton;
-    [SerializeField] private Button endTurnButton;
-    [SerializeField] public Button mainMenuButton;
-    [SerializeField] private TextMeshProUGUI winLoseText;
-    
 
     private List<BaseCard> cardsInDeck = new List<BaseCard>(25);
     private List<BaseCard> aiCardsInDeck = new List<BaseCard>(25);
@@ -199,6 +200,8 @@ public class DuelManager : MonoBehaviour
         remainingCardsTextAI.text = aiCardsInDeck.Count.ToString();
         battleButton.interactable = false;
         endTurnButton.interactable = false;
+        
+        startOfDuelPlayer.PlayStartDialogue(selectedPlayerEarl.GetEarlName(), AIEarl.GetEarlName(), rnd);
 
     }
 
@@ -254,6 +257,9 @@ public class DuelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// This function makes sure that we do not have any null cards that are supposedly occupying lanes
+    /// </summary>
     private void EndTurnFreeLane()
     {
         for (int i = 0; i < playerDuelLanes.Count; i++)
