@@ -554,7 +554,8 @@ public class DuelManager : MonoBehaviour
         mainMenuButton.gameObject.SetActive(true);
         endTurnButton.interactable = false;
         battleButton.interactable = false;
-        winLoseText.text = "You won!";        
+        winLoseText.text = "You won!";     
+        winLoseText.gameObject.SetActive(true);
     }
 
     private void LoseDuel()
@@ -566,6 +567,7 @@ public class DuelManager : MonoBehaviour
         endTurnButton.interactable = false;
         battleButton.interactable = false;
         winLoseText.text = "You lost!";
+        winLoseText.gameObject.SetActive(true);
     }
     
     /// <summary>
@@ -979,11 +981,11 @@ public class DuelManager : MonoBehaviour
         {
             int errorInt = rnd.Next(0, 100);
             
-            if (aiDuelLanes[i].occupied)
+            if (aiDuelLanes[i].occupied && aiDuelLanes[i].cardInLane)
             {
                 if (errorInt < aiSmartMoveChance && aiDuelLanes[i].cardInLane.GetCardName() != "The Priest")
                 {
-                    if (aiDuelLanes[i] != null)
+                    if (aiDuelLanes[i].cardInLane)
                     {
                         aiDuelLanes[i].cardInLane.SetShouldCardAttack(true);
                         yield return new WaitForSeconds(1.0f - UnityRandom.Range(-0.5f, 0.5f));
@@ -994,7 +996,7 @@ public class DuelManager : MonoBehaviour
                     }
 
                 }
-                else
+                else if (aiDuelLanes[i].cardInLane)
                 {
                     aiDuelLanes[i].cardInLane.SetShouldCardAttack(false);
                 }
