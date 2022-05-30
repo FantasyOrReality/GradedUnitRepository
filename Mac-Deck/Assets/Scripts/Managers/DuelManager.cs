@@ -178,10 +178,15 @@ public class DuelManager : MonoBehaviour
         OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
     }
 
-    public void SetUp()
+    public void GetReadyForDuel()
     {
-        selectedPlayerEarl = Instantiate(selectedPlayerEarl, earlTarget.position, earlTarget.rotation);
-        AIEarl = Instantiate(AIEarl, aiEarlTarget.position, aiEarlTarget.rotation);
+        GameObject player = Instantiate(selectedPlayerEarl.gameObject, earlTarget.position, earlTarget.rotation);
+        Debug.Log(player);
+        selectedPlayerEarl = player.GetComponent<BaseEarl>();
+
+        GameObject ai = Instantiate(AIEarl.gameObject, aiEarlTarget.position, aiEarlTarget.rotation);
+        AIEarl = ai.GetComponent<BaseEarl>();
+        Debug.Log(ai);
         
         AIEarl.AISetUp();
         

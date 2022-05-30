@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
             man.SetPlayerEarl(playerEarl);
 
         man.SetAIEarl(SelectAIEarl());
-        man.SetUp();
+        man.GetReadyForDuel();
         man.mainMenuButton.onClick.AddListener(SwitchToMainMenuFromGame);
     }
 

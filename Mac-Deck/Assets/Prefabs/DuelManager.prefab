@@ -3518,8 +3518,8 @@ MonoBehaviour:
   winLoseText: {fileID: 636075198}
   regularCursor: {fileID: 2800000, guid: c0b55e16840fbb642b2d8836c473dc39, type: 3}
   attackCursor: {fileID: 2800000, guid: cc0915b0b19d78844ab3123e2a2f1701, type: 3}
-  selectedPlayerEarl: {fileID: 3155908756827088431, guid: b649a26645d9859418e8ae28fa847145, type: 3}
-  AIEarl: {fileID: 3155908756827088431, guid: ed52a2aca46c0984b83da73fdff9292b, type: 3}
+  selectedPlayerEarl: {fileID: 0}
+  AIEarl: {fileID: 0}
   maxUnitsSummonedPerTurn: 1
   maxTacticCardsPlayedPerTurn: 1
   aiSmartMoveChance: 70
