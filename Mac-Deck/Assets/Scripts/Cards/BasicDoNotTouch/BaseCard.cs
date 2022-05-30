@@ -341,10 +341,10 @@ public class BaseCard : MonoBehaviour
     /// </summary>
     /// <param name="delta">Can be a number, positive numbers increase the health, negative decrease it.</param>
     /// <param name="onlyThisTurn">Should the effect only last this turn</param>
-    /// <param name="fromTempEffect">Was this function called to remove the temporary effects</param>
+    /// <param name="notInstigate">Should this function skip instigating the UnityEvent</param>
     /// <returns>Boolean, if health change has been applied</returns>
     // Example: If we play as Duncan, we can use this to determine if a card has been healed and if so, we can add 1 to the card healed counter
-    public bool ApplyHealthChange(int delta, bool onlyThisTurn = false, bool fromTempEffect = false)
+    public bool ApplyHealthChange(int delta, bool onlyThisTurn = false, bool notInstigate = false)
     {
         int previousHealth = cardHealth;
         cardHealth = Mathf.Clamp(cardHealth + delta, 0, 100);
@@ -363,18 +363,19 @@ public class BaseCard : MonoBehaviour
 
         healthText.text = newHealth;
 
-        if (!fromTempEffect)
+        if (!notInstigate)
             DuelManager.GetInstance().OnCardHealthChanged?.Invoke(this, cardHealth - previousHealth, isPlayerCard);
 
         if (cardHealth == 0)
         {
+            Debug.Log("Freeing Lane!" + cardName);
             DuelManager.GetInstance().FreeLane(laneIndex, isPlayerCard);
             DuelManager.GetInstance().OnCardDestroyed?.Invoke(this, isPlayerCard);
             Destroy(gameObject, 0.25f);
         }
         return cardHealth != previousHealth;
     }
-
+    
     /// <summary>
     /// Applying change in attack of the card, an example, can be Provision, which adds 1 to the card Attack
     /// </summary>

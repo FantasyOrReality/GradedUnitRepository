@@ -255,13 +255,13 @@ public class DuelManager : MonoBehaviour
     {
         if (playerLane)
         {
-            if (playerDuelLanes[laneIndex].cardInLane) Destroy(playerDuelLanes[laneIndex].cardInLane);
+            if (playerDuelLanes[laneIndex].cardInLane) Destroy(playerDuelLanes[laneIndex].cardInLane.gameObject);
             playerDuelLanes[laneIndex].occupied = false;
             playerDuelLanes[laneIndex].cardInLane = null;
         }
         else
         {
-            if (aiDuelLanes[laneIndex].cardInLane) Destroy(aiDuelLanes[laneIndex].cardInLane);
+            if (aiDuelLanes[laneIndex].cardInLane) Destroy(aiDuelLanes[laneIndex].cardInLane.gameObject);
             aiDuelLanes[laneIndex].occupied = false;
             aiDuelLanes[laneIndex].cardInLane = null;
         }

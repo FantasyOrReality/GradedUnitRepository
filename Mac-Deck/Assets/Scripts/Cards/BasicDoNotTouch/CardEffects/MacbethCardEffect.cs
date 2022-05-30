@@ -6,11 +6,16 @@ public class MacbethCardEffect : BaseCardEffect
     public override void SpecialEffect()
     {
         DuelManager manager = DuelManager.GetInstance();
-        owningEarl = manager.GetPlayerEarl();
+
+        if (isThisPlayerCard)
+            owningEarl = manager.GetPlayerEarl();
+        else
+            owningEarl = manager.GetAIEarl();
+        
         manager.OnEarlHealthChanged.AddListener(OnEarlHealthChanged);
         manager.OnCardHealthChanged.AddListener(OnCardHealthChanged);
         
-        owningCard.ApplyHealthChange(DuelManager.GetInstance().GetPlayerEarl().GetHealth(), false, true);
+        owningCard.ApplyHealthChange(owningEarl.GetHealth(), false, true);
     }
 
     private void OnDisable()
