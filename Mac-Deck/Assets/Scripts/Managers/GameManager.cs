@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = System.Random;
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject duelMan;
     [SerializeField] private string mainMenuScene;
     [SerializeField] private string duelScene;
-    [SerializeField] private BaseEarl playerEarl;
+    [SerializeField] public BaseEarl playerEarl;
     [SerializeField] private List<BaseEarl> Earls;
 
     private List<BaseEarl> internalEarls = new List<BaseEarl>(4);
@@ -61,15 +62,11 @@ public class GameManager : MonoBehaviour
 
         DuelManager man = duelMan.GetComponent<DuelManager>();
         
-        if (playerEarl)
+        if (playerEarl != null)
             man.SetPlayerEarl(playerEarl);
-        else
-        {
-            man.SetPlayerEarl(internalEarls[0]);
-            internalEarls.RemoveAt(0);
-        }
-        
+
         man.SetAIEarl(SelectAIEarl());
+        man.SetUp();
         man.mainMenuButton.onClick.AddListener(SwitchToMainMenuFromGame);
     }
 

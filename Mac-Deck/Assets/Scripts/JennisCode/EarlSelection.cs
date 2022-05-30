@@ -11,6 +11,8 @@ public class EarlSelection : MonoBehaviour
     [SerializeField] private List<EarlData> earls;
     [SerializeField] private List<Image> images;
     [SerializeField] private List<TextMeshProUGUI> names;
+    [SerializeField] private Button duelButton;
+    [SerializeField] private TextMeshProUGUI selectEarlText;
 
     public void Awake()
     {
@@ -24,5 +26,18 @@ public class EarlSelection : MonoBehaviour
     public void MainMenu()
     {
         SceneManager.LoadScene("MainMenu");
+    }
+
+    public void Start()
+    {
+        duelButton.onClick.AddListener(ChangeSceneToDuelScene);
+    }
+
+    public void ChangeSceneToDuelScene()
+    {
+        if (GameManager.GetInstance().playerEarl != null)
+            GameManager.GetInstance().SwitchToDuelScene();
+        else
+            selectEarlText.gameObject.SetActive(true);
     }
 }

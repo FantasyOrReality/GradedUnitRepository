@@ -178,7 +178,7 @@ public class DuelManager : MonoBehaviour
         OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
     }
 
-    public void Start()
+    public void SetUp()
     {
         selectedPlayerEarl = Instantiate(selectedPlayerEarl, earlTarget.position, earlTarget.rotation);
         AIEarl = Instantiate(AIEarl, aiEarlTarget.position, aiEarlTarget.rotation);
@@ -206,7 +206,6 @@ public class DuelManager : MonoBehaviour
         endTurnButton.interactable = false;
         
         startOfDuelPlayer.PlayStartDialogue(selectedPlayerEarl.GetEarlName(), AIEarl.GetEarlName(), rnd);
-
     }
 
     /// <summary>
@@ -251,11 +250,13 @@ public class DuelManager : MonoBehaviour
     {
         if (playerLane)
         {
+            if (playerDuelLanes[laneIndex].cardInLane) Destroy(playerDuelLanes[laneIndex].cardInLane);
             playerDuelLanes[laneIndex].occupied = false;
             playerDuelLanes[laneIndex].cardInLane = null;
         }
         else
         {
+            if (aiDuelLanes[laneIndex].cardInLane) Destroy(aiDuelLanes[laneIndex].cardInLane);
             aiDuelLanes[laneIndex].occupied = false;
             aiDuelLanes[laneIndex].cardInLane = null;
         }
