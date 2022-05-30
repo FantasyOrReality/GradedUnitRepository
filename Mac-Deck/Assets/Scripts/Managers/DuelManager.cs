@@ -751,9 +751,10 @@ public class DuelManager : MonoBehaviour
     /// <returns>null</returns>
     IEnumerator DrawAndLerpCardFromDeckToLocation(Vector3 target, int quantity = 1)
     {
-        if (cardsInDeck.Count == 0)
+        if (cardsInDeck.Count < 1)
         {
             LoseDuel();
+            StopAllCoroutines();
             yield break;
         }
 
@@ -840,6 +841,12 @@ public class DuelManager : MonoBehaviour
     IEnumerator AIDrawCard(int quantity = 1, bool shouldPlayTurn = true)
     {
         if (duelPhase == DuelPhase.EndPhase) yield break;
+        if (aiCardsInDeck.Count < 1)
+        {
+            WinDuel();
+            StopAllCoroutines();
+            yield break;
+        }
         if (aiHand.Count < 6)
         {
             BaseCard card = Instantiate(aiCardsInDeck[0], aiCardSpawn.position, aiCardSpawn.rotation);
@@ -859,6 +866,7 @@ public class DuelManager : MonoBehaviour
             card.AISetUp();
             aiHand.Add(card);
             aiCardsInDeck.RemoveAt(0);
+            remainingCardsTextAI.text = aiCardsInDeck.Count.ToString();
 
             if (quantity > 1)
                 StartCoroutine(AIDrawCard(quantity - 1, shouldPlayTurn));
