@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: MacbethCard
   m_EditorClassIdentifier: 
   cardName: Macbeth The Brave
-  cardDescription: He is a brave boy
+  cardDescription: Has synced <color=green><b><i>Health</i></b></color> with the
+    Earl
   cardStrength: 3
   cardHealth: 0
   cardType: 3
-  CardImage: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  CardImage: {fileID: 21300000, guid: 6e94974b53ba5c14fa463fdadef3e399, type: 3}
   cardEffect: {fileID: 1322062209947195055, guid: 9fa408a5db178334b8af93a00479a61e, type: 3}
   autoExecuteEffect: 1

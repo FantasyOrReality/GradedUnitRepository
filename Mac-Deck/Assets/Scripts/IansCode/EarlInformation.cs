@@ -17,7 +17,7 @@ public class EarlInformation : MonoBehaviour
     public void OnEarlClick(EarlData earlData)
     {
         earlImage.sprite = earlData.earlImage;
-        earlName.text = earlData.earlName + earlData.earlSuffix;
+        earlName.text = earlData.earlName + " " + earlData.earlSuffix;
         earlDescription.text = earlData.earlDescription;
         earlSelected = true;
         

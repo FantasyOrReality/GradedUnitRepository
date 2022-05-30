@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DoubleTrouble
   m_EditorClassIdentifier: 
   cardName: Double Trouble
-  cardDescription: This card is cool
+  cardDescription: Play a duplicate and see what happens
   cardStrength: 2
   cardHealth: 1
   cardType: 3

@@ -15,6 +15,6 @@ public class SetUpEarls : MonoBehaviour
     public void Awake()
     {
         image.sprite = data.earlImage;
-        earlName.text = data.earlName + data.earlSuffix;
+        earlName.text = data.earlName  + " " + data.earlSuffix;
     }
 }

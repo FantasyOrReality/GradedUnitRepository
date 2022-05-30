@@ -46,6 +46,9 @@ public class BaseCard : MonoBehaviour
     [SerializeField] private GameObject attackUI;
     [SerializeField] private AudioSource soundWhenPlayed;
     [SerializeField] private AudioSource cardHealed;
+    [SerializeField] private GameObject trail;
+    [SerializeField] private ParticleSystem strengthIncrease;
+    [SerializeField] private ParticleSystem healthIncrease;
 
     // Basic Set up of the card, like adding images and text, saving variables and binding events for when it is clicked, hovered and so on
     private void Awake()
@@ -156,6 +159,7 @@ public class BaseCard : MonoBehaviour
             transform.position = targetHoverCardLocation;
             transform.localScale = targetHoverCardScale;
             isCardSelected = true;
+            trail.SetActive(true);
             return;
         }
         
@@ -170,7 +174,7 @@ public class BaseCard : MonoBehaviour
     {
         if (!isCardSelected || cardPlayed) return;
         
-        
+        trail.SetActive(false);
         isCardSelected = false;
         if (!DuelManager.GetInstance().TryPlayCard(this, cardData.autoExecuteEffect))
         {
@@ -352,7 +356,10 @@ public class BaseCard : MonoBehaviour
         }
 
         if (delta > 0)
+        {
+            healthIncrease.Play();
             cardHealed.Play();
+        }
 
         healthText.text = newHealth;
 
@@ -380,7 +387,10 @@ public class BaseCard : MonoBehaviour
         string newStrength = cardStrength.ToString();
 
         if (delta > 0)
+        {
+            strengthIncrease.Play();
             cardHealed.Play();
+        }
         
         if (cardStrength > cardData.cardStrength)
         {

@@ -113,6 +113,8 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private Button endTurnButton;
     [SerializeField] public Button mainMenuButton;
     [SerializeField] private TextMeshProUGUI winLoseText;
+    [SerializeField] private Texture2D regularCursor;
+    [SerializeField] private Texture2D attackCursor;
     
     
     [Space(10)]
@@ -170,6 +172,8 @@ public class DuelManager : MonoBehaviour
         
         Instantiate(nameGen);
         rnd = new Random();
+        
+        Cursor.SetCursor(regularCursor, Vector2.zero, CursorMode.Auto);
         
         OnEarlHealthChanged.AddListener(OnEarlHealthChangedInternal);
     }
@@ -491,6 +495,7 @@ public class DuelManager : MonoBehaviour
 
         if (duelPhase == DuelPhase.CombatPhase) 
         {
+            Cursor.SetCursor(regularCursor, Vector2.zero, CursorMode.Auto);
             ChangeDuelPhase(DuelPhase.MainPhase);
             foreach (var duelLane in playerDuelLanes)
             {
@@ -505,6 +510,7 @@ public class DuelManager : MonoBehaviour
         }
         
         ChangeDuelPhase(DuelPhase.CombatPhase);
+        Cursor.SetCursor(attackCursor, Vector2.zero, CursorMode.Auto);
         foreach (var duelLane in playerDuelLanes)
         {
             if (duelLane.occupied)
@@ -1140,14 +1146,14 @@ public class DuelManager : MonoBehaviour
 
             if (errorInt < aiSmartMoveChance)
             {
-                if (card.GetCardStrength() > playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
+                if (playerDuelLanes[laneIndex].cardInLane != null && card.GetCardStrength() > playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
                     returnCard = card;
                 else if (!card.IsCardTactic())
                     returnCard = card;
             }
             else
             {
-                if (card.GetCardStrength() < playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
+                if (playerDuelLanes[laneIndex].cardInLane != null && card.GetCardStrength() < playerDuelLanes[laneIndex].cardInLane.GetCardStrength() && !card.IsCardTactic())
                     returnCard = card;
                 else if (!card.IsCardTactic())
                     returnCard = card;
