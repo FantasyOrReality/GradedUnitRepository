@@ -8,6 +8,7 @@ using Random = System.Random;
 
 public class GameManager : MonoBehaviour
 {
+    private GameObject innerDuelMan;
     [SerializeField] private GameObject duelMan;
     [SerializeField] private string mainMenuScene;
     [SerializeField] private string duelScene;
@@ -43,7 +44,7 @@ public class GameManager : MonoBehaviour
 
     public void SwitchToMainMenuFromGame()
     {
-        Destroy(duelMan.gameObject);
+        Destroy(innerDuelMan.gameObject);
         PopulateEarlList();
         SceneManager.LoadScene(mainMenuScene);
     }
@@ -58,9 +59,9 @@ public class GameManager : MonoBehaviour
         // Wait a frame so every Awake and Start method is called
         yield return new WaitForEndOfFrame();
         
-        duelMan = Instantiate(duelMan, Vector3.zero, Quaternion.identity);
+        innerDuelMan = Instantiate(duelMan, Vector3.zero, Quaternion.identity);
 
-        DuelManager man = duelMan.GetComponent<DuelManager>();
+        DuelManager man = innerDuelMan.GetComponent<DuelManager>();
         
         if (playerEarl != null)
             man.SetPlayerEarl(playerEarl);

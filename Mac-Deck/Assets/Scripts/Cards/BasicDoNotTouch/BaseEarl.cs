@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ public class BaseEarl : MonoBehaviour
     [SerializeField] private EarlData earlData;
     [SerializeField] private TextMeshProUGUI earlName;
     [SerializeField] private TextMeshProUGUI earlHealth;
+    [SerializeField] private Image earlEffectSprite;
 
     private GameObject earlEffect;
     private bool isPlayerEarl = true;
@@ -30,6 +32,8 @@ public class BaseEarl : MonoBehaviour
             BaseEarlEffect eff = earlEffect.GetComponent<BaseEarlEffect>();
             eff.SetUp();
             eff.SetIsThisPlayerEarl(true);
+            earlEffectSprite.gameObject.SetActive(true);
+            earlEffectSprite.sprite = earlData.effectSprite;
         }
 
         earlHealth.text = currHealth.ToString();
@@ -41,6 +45,10 @@ public class BaseEarl : MonoBehaviour
         newPositionName.y = -1 * newPositionName.y;
         isPlayerEarl = false;
         earlName.gameObject.transform.localPosition = newPositionName;
+        earlEffectSprite.transform.localPosition = -earlEffectSprite.transform.localPosition;
+        Vector3 newPositionHealth = earlHealth.transform.localPosition;
+        newPositionHealth.x = -newPositionHealth.x;
+        earlHealth.transform.localPosition = newPositionHealth;
         
         if (earlEffect)
             earlEffect.GetComponent<BaseEarlEffect>().SetIsThisPlayerEarl(false);

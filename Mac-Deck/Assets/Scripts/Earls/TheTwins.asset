@@ -33,3 +33,4 @@ MonoBehaviour:
   earlImage: {fileID: 21300000, guid: 6892e80150c313b429b8e23b7cf458ef, type: 3}
   earlDeck: {fileID: 11400000, guid: 32dd4f034f05afe4296de5848a0388cb, type: 2}
   earlEffect: {fileID: 7115115627956922924, guid: 54e7b16d36c229943b30eb1b58442d5a, type: 3}
+  effectSprite: {fileID: 21300000, guid: 56898d35afdf8574191eed8e773384e8, type: 3}
