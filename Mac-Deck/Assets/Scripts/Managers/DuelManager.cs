@@ -80,6 +80,7 @@ public class DuelManager : MonoBehaviour
     [HideInInspector] 
     public UnityEvent<bool> OnTurnEnded;
     
+    
     [Space(10)]
     [Header("Player Targets")]
     [SerializeField] private List<DuelLanes> playerDuelLanes = new List<DuelLanes>(4);
@@ -115,7 +116,6 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI winLoseText;
     [SerializeField] private Texture2D regularCursor;
     [SerializeField] private Texture2D attackCursor;
-    [SerializeField] private Animation attackAnim;
     
     
     [Space(10)]
@@ -123,12 +123,14 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private BaseEarl selectedPlayerEarl;
     [SerializeField] private BaseEarl AIEarl;
 
+    
     [Space(10)] 
     [Header("Duel Variables")] 
     [SerializeField] private int maxUnitsSummonedPerTurn = 1;
     [SerializeField] private int maxTacticCardsPlayedPerTurn = 1;
     [SerializeField] private int aiSmartMoveChance = 70;
 
+    
     [Space(10)] 
     [Header("Sounds")] 
     [SerializeField] private AudioSource drawSound;
@@ -695,8 +697,6 @@ public class DuelManager : MonoBehaviour
             }
 
             combatSound.Play();
-            attackAnim.transform.position = dl1[index].cardInLane.transform.position;
-            attackAnim.Play();
             if (dl2[index].occupied)
             {
                 int dmg = -dl2[index].cardInLane.GetCardStrength();
