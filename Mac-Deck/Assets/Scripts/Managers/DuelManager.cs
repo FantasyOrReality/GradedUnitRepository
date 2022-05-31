@@ -115,6 +115,7 @@ public class DuelManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI winLoseText;
     [SerializeField] private Texture2D regularCursor;
     [SerializeField] private Texture2D attackCursor;
+    [SerializeField] private Animation attackAnim;
     
     
     [Space(10)]
@@ -694,6 +695,8 @@ public class DuelManager : MonoBehaviour
             }
 
             combatSound.Play();
+            attackAnim.transform.position = dl1[index].cardInLane.transform.position;
+            attackAnim.Play();
             if (dl2[index].occupied)
             {
                 int dmg = -dl2[index].cardInLane.GetCardStrength();
