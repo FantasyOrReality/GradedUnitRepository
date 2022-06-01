@@ -84,7 +84,7 @@ public class SNameGenerator : MonoBehaviour
     {
         nameIndex++;
 
-        if (nameIndex == generatedNames.Count) nameIndex = 0;
+        if (nameIndex == generatedNames.Count - 1) nameIndex = 0;
         
         return generatedNames[nameIndex - 1];
     }
