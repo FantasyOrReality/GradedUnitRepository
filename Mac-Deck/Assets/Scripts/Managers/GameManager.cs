@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
         Destroy(innerDuelMan.gameObject);
         PopulateEarlList();
         SceneManager.LoadScene(mainMenuScene);
+        Destroy(gameObject);
     }
     
     private IEnumerator SwitchToDuelSceneInternal()

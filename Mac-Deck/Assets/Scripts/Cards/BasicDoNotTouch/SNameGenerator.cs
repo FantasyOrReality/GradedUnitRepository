@@ -83,6 +83,9 @@ public class SNameGenerator : MonoBehaviour
     public string GetRandomName()
     {
         nameIndex++;
+
+        if (nameIndex == generatedNames.Count) nameIndex = 0;
+        
         return generatedNames[nameIndex - 1];
     }
 }
