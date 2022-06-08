@@ -912,9 +912,18 @@ public class DuelManager : MonoBehaviour
                 cardToPlay.GetComponentInChildren<Canvas>().sortingOrder = 1;
                 cardToPlay.SetLaneIndex(laneIndex);
                 AISortOutHand(cardToPlay);
-                var ce = cardToPlay.GetCardEffect();
-                if (ce)
-                    ce.SetIsThisPlayerCard(false);
+
+                if (cardToPlay.TryInstantiateCardEffect())
+                {
+                    var ce = cardToPlay.GetCardEffect();
+                    if (ce)
+                    {
+                        ce.SetIsThisPlayerCard(false);
+                        if (cardToPlay.GetShouldAutoExecuteEffect())
+                            ce.SpecialEffect();
+                    }
+                }
+                
                 aiDuelLanes[laneIndex].occupied = true;
                 aiDuelLanes[laneIndex].cardInLane = cardToPlay;
                 numUnitsSummoned++;

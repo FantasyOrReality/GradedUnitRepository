@@ -317,6 +317,21 @@ public class BaseCard : MonoBehaviour
         laneIndex = index;
     }
 
+    public bool GetShouldAutoExecuteEffect()
+    {
+        return cardData.autoExecuteEffect;
+    }
+
+    public bool TryInstantiateCardEffect()
+    {
+        if (!cardData.cardEffect) return false;
+        
+        cardEffect = Instantiate(cardData.cardEffect, transform);
+        cardEffect.GetComponent<BaseCardEffect>().SetOwningCard(this);
+
+        return true;
+    }
+
     public BaseCardEffect GetCardEffect()
     {
         if (cardEffect)
